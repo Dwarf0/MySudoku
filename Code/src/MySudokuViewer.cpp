@@ -13,6 +13,9 @@ MySudokuViewer::~MySudokuViewer() {
 
 void MySudokuViewer::loadFromCsv()
 { 
-	QFileDialog diag(this, tr("Select csv file"), QString(), "*.csv");
-	_sudokuModel.loadFromCsv(diag.getOpenFileName());
+	QFileDialog diag(this, tr("Select csv file"), QString(), tr("CSV (*.csv)"));
+	QString csvPath = diag.getOpenFileName();
+	if (csvPath != QString::null) {
+		_sudokuModel.loadFromCsv(diag.getOpenFileName());
+	}
 }

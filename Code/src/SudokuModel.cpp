@@ -24,12 +24,12 @@ QVariant SudokuModel::data(const QModelIndex &index, int role) const
 }
 
 
-void SudokuModel::loadFromCsv(QString csvPath)
+int SudokuModel::loadFromCsv(QString csvPath)
 {
 	QFile csv(csvPath);
 	if (!csv.exists()) {
-		std::cerr << "ERROR - csv file not found at " << csvPath.toStdString().c_str() << std::endl;
-		return;
+		std::cout << "ERROR - csv file not found at " << csvPath.toStdString() << std::endl;
+		return 1;
 	}
 	csv.open(QFile::ReadOnly);
 	QTextStream textStream(&csv);
@@ -39,22 +39,24 @@ void SudokuModel::loadFromCsv(QString csvPath)
 		if (line.isEmpty()) {
 			continue;
 		}
-
+		
 		QStringList splitted = line.split(";");
 		if (splitted.size() != 9) {
-			std::cerr << "ERROR - wrong number of values at row " << rowIndex << " of csv file " << csvPath.toStdString().c_str() << std::endl;
-			return;
+			std::cout << "ERROR - wrong number of values at row " << rowIndex << " of csv file " << csvPath.toStdString() << std::endl;
+			csv.close();
+			return 2;
 		}
+		bool ok = true;
 		for (int colIndex = 0; colIndex < splitted.size(); ++colIndex) {
-			bool ok=true;
 			int val = splitted[colIndex].toInt(&ok);
 			if (!ok) {
-				std::cerr << "ERROR - csv value " << splitted[colIndex].toStdString().c_str() 
+				std::cout << "ERROR - csv value " << splitted[colIndex].toStdString()
 							<< " at row " << rowIndex
-							<< " of csv file " << csvPath.toStdString().c_str()
+							<< " of csv file " << csvPath.toStdString()
 							<< " could not be converted to int"
 							<< std::endl;
-				return;
+				csv.close();
+				return 3;
 			}
 			_values[rowIndex][colIndex] = splitted[colIndex].toInt();
 		}
@@ -62,6 +64,7 @@ void SudokuModel::loadFromCsv(QString csvPath)
 	}
 
 	csv.close();
+	return 0;
 }
 
 QString SudokuModel::toString()

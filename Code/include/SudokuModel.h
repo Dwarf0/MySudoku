@@ -22,7 +22,7 @@ public:
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override { return 9; }
 	QVariant data(const QModelIndex &index, int role) const override;
 
-	void loadFromCsv(QString csvPath);
+	int loadFromCsv(QString csvPath);
 
 	QString toString();
 
