@@ -13,9 +13,11 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} Code/include)
 set(SOURCE_FILES
         Code/src/main.cpp
         Code/src/MySudokuViewer.cpp
+        Code/src/SudokuModel.cpp
 )
 set(HEADER_FILES
         Code/include/MySudokuViewer.h
+        Code/include/SudokuModel.h
 )
 set(FORMS_FILES
         # Code/ui/TranslatorGroupBox.ui
