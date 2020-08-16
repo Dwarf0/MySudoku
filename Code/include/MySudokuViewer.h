@@ -9,6 +9,7 @@
 
 #include "SudokuModel.h"
 #include "SudokuView.h"
+#include "SudokuDelegate.h"
 
 class MySudokuViewer : public QMainWindow
 {
@@ -24,6 +25,7 @@ private:
 	Ui::MainWindow _mainWindowUi;
 	SudokuModel *_sudokuModel;
 	SudokuView *_sudokuView;
+	SudokuDelegate *_sudokuDelegate;
 };
 
 #endif // MYSUDOKUVIEWER_H

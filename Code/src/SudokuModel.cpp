@@ -35,6 +35,10 @@ QVariant SudokuModel::data(const QModelIndex &index, int role) const
 		return Qt::AlignCenter;
 	} else if (role == Qt::BackgroundRole) {
 		return (r / SQUARE_SIZE + c / SQUARE_SIZE) % 2 ? QBrush(Qt::lightGray) : QBrush(Qt::white);
+	} else if (role == SudokuModel::IsValidRole) {
+		return _values[index.row()][index.column()].isValid;
+	} else if (role == SudokuModel::IsInitialValueRole) {
+		return _values[index.row()][index.column()].isInitialValue;
 	}
 	return QVariant();
 }
@@ -181,6 +185,18 @@ bool SudokuModel::isValueValidAt(int value, int row, int col)
 			int r = i + SQUARE_SIZE * int(row / SQUARE_SIZE);
 			int c = j + SQUARE_SIZE * int(col / SQUARE_SIZE);
 			if (_values[r][c].value == value && (r != row && c != col)) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool SudokuModel::isFilled()
+{
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			if (_values[i][j].value == 0) {
 				return false;
 			}
 		}

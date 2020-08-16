@@ -7,6 +7,7 @@
 
 #include "globals.h"
 
+
 class SudokuModel : public QAbstractTableModel
 {
 	Q_OBJECT
@@ -25,9 +26,15 @@ public:
 	bool isValueValidAt(int value, int row, int col);
 	bool cellIsValid(int row, int col);
 	bool isValid();
+	bool isFilled();
 
 	QString toString() const;
 	void print() const;
+
+	enum AdditionalRoles {
+		IsValidRole = Qt::UserRole+1,
+		IsInitialValueRole
+	};
 
 protected:
 	struct SudokuCell {

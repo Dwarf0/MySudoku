@@ -14,8 +14,6 @@ public:
 	SudokuView(QWidget *parent = nullptr);
 	~SudokuView();
 
-private slots:
-
 private:
 	SudokuModel *_model;
 };

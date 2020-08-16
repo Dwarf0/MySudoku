@@ -25,6 +25,7 @@ set(SOURCE_FILES
         Code/src/MySudokuViewer.cpp
         Code/src/SudokuModel.cpp
         Code/src/SudokuView.cpp
+        Code/src/SudokuDelegate.cpp
 )
 PREPEND(SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${SOURCE_FILES})
 
@@ -32,6 +33,7 @@ set(HEADER_FILES
         Code/include/MySudokuViewer.h
         Code/include/SudokuModel.h
 		Code/include/SudokuView.h
+		Code/include/SudokuDelegate.h
 		Code/include/globals.h
 )
 PREPEND(HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${HEADER_FILES})
