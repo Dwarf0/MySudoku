@@ -10,6 +10,7 @@
 #include "ui_MainWindow.h"
 
 #include "SudokuModel.h"
+#include "SudokuView.h"
 
 class MySudokuViewer : public QMainWindow
 {
@@ -23,7 +24,8 @@ private slots:
 
 private:
 	Ui::MainWindow _mainWindowUi;
-	SudokuModel _sudokuModel;
+	SudokuModel *_sudokuModel;
+	SudokuView *_sudokuView;
 };
 
 #endif // MYSUDOKUVIEWER_H

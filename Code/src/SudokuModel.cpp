@@ -16,8 +16,17 @@ SudokuModel::~SudokuModel() {
 
 QVariant SudokuModel::data(const QModelIndex &index, int role) const
 { 
-	if( 0 <= index.row() || index.row() < 9 || 0 <= index.column() || index.column() < 9)
-		return _values[index.row()][index.column()];
+	int r = index.row();
+	int c = index.column();
+
+	if (role == Qt::DisplayRole) {
+		if (0 <= index.row() || index.row() < 9 || 0 <= index.column() || index.column() < 9)
+			return _values[index.row()][index.column()];
+	} else if (role == Qt::TextAlignmentRole) {
+		return Qt::AlignHCenter | Qt::AlignVCenter;
+	} else if (role == Qt::BackgroundRole) {
+		return (r / 3 + c / 3) % 2 ? QBrush(Qt::lightGray) : QBrush(Qt::white);
+	}
 	return QVariant();
 }
 

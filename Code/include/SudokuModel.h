@@ -9,8 +9,6 @@
 #include <iostream>
 #include <qvector.h>
 
-#include "ui_MainWindow.h"
-
 #define SUDOKU_SIZE 9
 
 class SudokuModel : public QAbstractTableModel
