@@ -20,12 +20,14 @@ MySudokuViewer::MySudokuViewer(QWidget *parent) {
 }
 
 MySudokuViewer::~MySudokuViewer() {
+	delete _sudokuModel;
+	delete _sudokuDelegate;
 }
 
 void MySudokuViewer::loadFromCsv()
 { 
-	QFileDialog diag(this, tr("Select csv file"), QString(), tr("CSV (*.csv)"));
-	QString csvPath = diag.getOpenFileName();
+	QFileDialog diag;
+	QString csvPath = diag.getOpenFileName(this, tr("Select csv file"), QString(), tr("CSV (*.csv)"));
 	if (csvPath != QString::null) {
 		_sudokuModel->loadFromCsv(csvPath);
 	}
