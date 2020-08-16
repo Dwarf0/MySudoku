@@ -3,8 +3,6 @@
 
 #include <QObject>
 #include <QMainWindow>
-#include <qmenubar.h>
-#include <QAction>
 #include <iostream>
 
 #include "ui_MainWindow.h"

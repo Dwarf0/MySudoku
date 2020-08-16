@@ -2,12 +2,8 @@
 #define SUDOKUMODEL_H
 
 #include <QObject>
-#include <QMainWindow>
 #include <QAbstractItemModel>
-#include <qmenubar.h>
-#include <QAction>
 #include <iostream>
-#include <qvector.h>
 
 #include "globals.h"
 
@@ -21,15 +17,17 @@ public:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override { return SUDOKU_SIZE; }
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override { return SUDOKU_SIZE; }
 	QVariant data(const QModelIndex &index, int role) const override;
-	// bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+	Qt::ItemFlags flags(const QModelIndex &index) const;
 
 	int loadFromCsv(QString csvPath);
 
+	bool isValueValidAt(int value, int row, int col);
 	bool cellIsValid(int row, int col);
 	bool isValid();
 
-	QString toString();
-	void print();
+	QString toString() const;
+	void print() const;
 
 protected:
 	struct SudokuCell {

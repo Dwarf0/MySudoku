@@ -2,12 +2,8 @@
 #define SUDOKUVIEW_H
 
 #include <QObject>
-#include <QMainWindow>
 #include <QTableView>
-#include <qmenubar.h>
-#include <QAction>
 #include <iostream>
-#include <qvector.h>
 
 #include "SudokuModel.h"
 

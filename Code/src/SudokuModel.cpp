@@ -2,6 +2,7 @@
 
 #include <QFile>
 #include <QTextStream>
+#include <QBrush>
 
 SudokuModel::SudokuModel(QWidget *parent) {
 	resetModelValues();
@@ -27,16 +28,40 @@ QVariant SudokuModel::data(const QModelIndex &index, int role) const
 	int c = index.column();
 
 	if (role == Qt::DisplayRole) {
-		if (0 <= index.row() || index.row() < SUDOKU_SIZE || 0 <= index.column() || index.column() < SUDOKU_SIZE)
+		if (0 <= index.row() || index.row() < SUDOKU_SIZE || 0 <= index.column() || index.column() < SUDOKU_SIZE) {
 			return _values[index.row()][index.column()].value;
+		}
 	} else if (role == Qt::TextAlignmentRole) {
-		return Qt::AlignHCenter | Qt::AlignVCenter;
+		return Qt::AlignCenter;
 	} else if (role == Qt::BackgroundRole) {
 		return (r / SQUARE_SIZE + c / SQUARE_SIZE) % 2 ? QBrush(Qt::lightGray) : QBrush(Qt::white);
 	}
 	return QVariant();
 }
 
+bool SudokuModel::setData(const QModelIndex & index, const QVariant & value, int role)
+{
+	int r = index.row();
+	int c = index.column();
+	bool ok;
+	int intVal = value.toInt(&ok);
+	if (ok && 1 <= intVal && intVal <= 9) {
+		_values[r][c].value = intVal;
+		_values[r][c].isValid = cellIsValid(r, c);
+		return true;
+	}
+
+	return false;
+}
+
+Qt::ItemFlags SudokuModel::flags(const QModelIndex &index) const
+{
+	Qt::ItemFlags f = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+	if (!_values[index.row()][index.column()].isInitialValue) {
+		f |= Qt::ItemIsEditable;
+	}
+	return f;
+}
 
 int SudokuModel::loadFromCsv(QString csvPath)
 {
@@ -65,7 +90,7 @@ int SudokuModel::loadFromCsv(QString csvPath)
 		bool ok = true;
 		for (int colIndex = 0; colIndex < splitted.size(); ++colIndex) {
 			int val = splitted[colIndex].toInt(&ok);
-			if (!ok) {
+			if (!ok || val < 0 || val > 9) {
 				std::cout << "ERROR - csv value " << splitted[colIndex].toStdString()
 							<< " at row " << rowIndex
 							<< " of csv file " << csvPath.toStdString()
@@ -74,8 +99,10 @@ int SudokuModel::loadFromCsv(QString csvPath)
 				csv.close();
 				return 3;
 			}
-			_values[rowIndex][colIndex].value = splitted[colIndex].toInt();
-			_values[rowIndex][colIndex].isInitialValue = true;
+			_values[rowIndex][colIndex].value = val;
+			if (val) {
+				_values[rowIndex][colIndex].isInitialValue = true;
+			}
 		}
 		rowIndex++;
 	}
@@ -88,7 +115,7 @@ int SudokuModel::loadFromCsv(QString csvPath)
 	return 0;
 }
 
-QString SudokuModel::toString()
+QString SudokuModel::toString() const
 {
 	QString str;
 	for (int i = 0; i < SUDOKU_SIZE; i++) {
@@ -102,7 +129,7 @@ QString SudokuModel::toString()
 	return str.left(str.size() - 1);
 }
 
-void SudokuModel::print()
+void SudokuModel::print() const
 {
 	QString topSep = "|-----------------|"; // ┌┬┐ ╔╦╗
 	QString sep = "|-+-+-+-+-+-+-+-+-|";	// ├┼┤ ╠╬╣ 
@@ -131,16 +158,21 @@ bool SudokuModel::isValid()
 
 bool SudokuModel::cellIsValid(int row, int col)
 {
-	bool valid = true;
-	int curValue = _values[row][col].value;
-	if (curValue == 0) {
-		valid = true;
+	_values[row][col].isValid = isValueValidAt(_values[row][col].value, row, col);
+	return _values[row][col].isValid;
+}
+
+
+bool SudokuModel::isValueValidAt(int value, int row, int col)
+{
+	if (value == 0) {
+		return true;
 	}
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
-		bool onRow = _values[row][i].value == curValue && i != col;
-		bool onCol = _values[i][col].value == curValue && i != row;
-		if (onRow || onCol) {
-			valid = false;
+		bool alreadyOnRow = _values[row][i].value == value && i != col;
+		bool alreadyOnCol = _values[i][col].value == value && i != row;
+		if (alreadyOnRow || alreadyOnCol) {
+			return false;
 		}
 	}
 
@@ -148,11 +180,10 @@ bool SudokuModel::cellIsValid(int row, int col)
 		for (int j = 0; j < SQUARE_SIZE; ++j) {
 			int r = i + SQUARE_SIZE * int(row / SQUARE_SIZE);
 			int c = j + SQUARE_SIZE * int(col / SQUARE_SIZE);
-			if (_values[r][c].value == curValue && (r != row && c != col)) {
-				valid = false;
+			if (_values[r][c].value == value && (r != row && c != col)) {
+				return false;
 			}
 		}
 	}
-	_values[row][col].isValid = valid;
-	return valid;
+	return true;
 }
