@@ -4,8 +4,8 @@
 #include <QTextStream>
 
 SudokuModel::SudokuModel(QWidget *parent) {
-	for (int i = 0; i < 9; i++) {
-		for (int j = 0; j < 9; j++) {
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
 			_values[i][j] = 0;
 		}
 	}
@@ -20,12 +20,12 @@ QVariant SudokuModel::data(const QModelIndex &index, int role) const
 	int c = index.column();
 
 	if (role == Qt::DisplayRole) {
-		if (0 <= index.row() || index.row() < 9 || 0 <= index.column() || index.column() < 9)
+		if (0 <= index.row() || index.row() < SUDOKU_SIZE || 0 <= index.column() || index.column() < SUDOKU_SIZE)
 			return _values[index.row()][index.column()];
 	} else if (role == Qt::TextAlignmentRole) {
 		return Qt::AlignHCenter | Qt::AlignVCenter;
 	} else if (role == Qt::BackgroundRole) {
-		return (r / 3 + c / 3) % 2 ? QBrush(Qt::lightGray) : QBrush(Qt::white);
+		return (r / SQUARE_SIZE + c / SQUARE_SIZE) % 2 ? QBrush(Qt::lightGray) : QBrush(Qt::white);
 	}
 	return QVariant();
 }
@@ -48,7 +48,7 @@ int SudokuModel::loadFromCsv(QString csvPath)
 		}
 		
 		QStringList splitted = line.split(";");
-		if (splitted.size() != 9) {
+		if (splitted.size() != SUDOKU_SIZE) {
 			std::cout << "ERROR - wrong number of values at row " << rowIndex << " of csv file " << csvPath.toStdString() << std::endl;
 			csv.close();
 			return 2;
@@ -81,9 +81,9 @@ int SudokuModel::loadFromCsv(QString csvPath)
 QString SudokuModel::toString()
 {
 	QString str;
-	for (int i = 0; i < 9; i++) {
+	for (int i = 0; i < SUDOKU_SIZE; i++) {
 		QStringList l;
-		for (int j = 0; j < 9; j++) {
+		for (int j = 0; j < SUDOKU_SIZE; j++) {
 			l.append(QString::number(_values[i][j]));
 		}
 		str.append(l.join(";"));
@@ -110,8 +110,8 @@ void SudokuModel::print()
 
 bool SudokuModel::isValid()
 {
-	for (int i = 0; i < 9; ++i) {
-		for (int j = 0; j < 9; ++j) {
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
 			if (!valueIsValid(i, j))
 				return false;
 		}
@@ -125,7 +125,7 @@ bool SudokuModel::valueIsValid(int row, int col)
 	if (curValue == 0) {
 		return true;
 	}
-	for (int i = 0; i < 9; ++i) {
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		bool onRow = _values[row][i] == curValue && i != col;
 		bool onCol = _values[i][col] == curValue && i != row;
 		if (onRow || onCol) {
@@ -133,10 +133,10 @@ bool SudokuModel::valueIsValid(int row, int col)
 		}
 	}
 
-	for (int i = 0; i < 3; ++i) {
-		for (int j = 0; j < 3; ++j) {
-			int r = i + 3 * int(row / 3);
-			int c = j + 3 * int(col / 3);
+	for (int i = 0; i < SQUARE_SIZE; ++i) {
+		for (int j = 0; j < SQUARE_SIZE; ++j) {
+			int r = i + SQUARE_SIZE * int(row / SQUARE_SIZE);
+			int c = j + SQUARE_SIZE * int(col / SQUARE_SIZE);
 			if (_values[r][c] == curValue && (r != row && c != col)) {
 				return false;
 			}

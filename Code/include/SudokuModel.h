@@ -9,7 +9,7 @@
 #include <iostream>
 #include <qvector.h>
 
-#define SUDOKU_SIZE 9
+#include "globals.h"
 
 class SudokuModel : public QAbstractTableModel
 {
@@ -34,7 +34,7 @@ public:
 private slots:
 
 private:
-	int _values[9][9];
+	int _values[SUDOKU_SIZE][SUDOKU_SIZE];
 };
 
 #endif // SUDOKUMODEL_H
