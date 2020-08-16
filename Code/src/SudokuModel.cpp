@@ -1,15 +1,13 @@
-#include "SudokuModel.h"
+﻿#include "SudokuModel.h"
 
 #include <QFile>
 #include <QTextStream>
 
 SudokuModel::SudokuModel(QWidget *parent) {
 	for (int i = 0; i < 9; i++) {
-		QVector<int> row;
 		for (int j = 0; j < 9; j++) {
-			row.append(0);
+			_values[i][j] = 0;
 		}
-		_values.append(row);
 	}
 }
 
@@ -78,5 +76,21 @@ QString SudokuModel::toString()
 		str.append(l.join(";"));
 		str.append("\n");
 	}
-	return str;
+	return str.left(str.size() - 1);
+}
+
+void SudokuModel::print()
+{
+	QString topSep = "|-----------------|"; // ┌┬┐ ╔╦╗
+	QString sep = "|-+-+-+-+-+-+-+-+-|";	// ├┼┤ ╠╬╣ 
+	QString botSep = "|-----------------|"; // └┴┘ ╚╩╝
+
+	QString str = toString(); // | ║
+	str.replace(';', '|');
+	str.replace('\n', "|\n" + sep + "\n|");
+	str = '|' + str + '|';
+
+	std::cout << topSep.toStdString() << std::endl;
+	std::cout << str.toStdString() << std::endl;
+	std::cout << botSep.toStdString() << std::endl;
 }
