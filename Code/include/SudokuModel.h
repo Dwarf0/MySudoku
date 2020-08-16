@@ -27,7 +27,8 @@ public:
 
 	int loadFromCsv(QString csvPath);
 
-	// bool isValid();
+	bool valueIsValid(int row, int col);
+	bool isValid();
 
 	QString toString();
 	void print();

@@ -62,6 +62,10 @@ int SudokuModel::loadFromCsv(QString csvPath)
 	}
 
 	csv.close();
+
+	if (!isValid()) {
+		return 4;
+	}
 	return 0;
 }
 
@@ -93,4 +97,41 @@ void SudokuModel::print()
 	std::cout << topSep.toStdString() << std::endl;
 	std::cout << str.toStdString() << std::endl;
 	std::cout << botSep.toStdString() << std::endl;
+}
+
+bool SudokuModel::isValid()
+{
+	for (int i = 0; i < 9; ++i) {
+		for (int j = 0; j < 9; ++j) {
+			if (!valueIsValid(i, j))
+				return false;
+		}
+	}
+	return true;
+}
+
+bool SudokuModel::valueIsValid(int row, int col)
+{
+	int curValue = _values[row][col];
+	if (curValue == 0) {
+		return true;
+	}
+	for (int i = 0; i < 9; ++i) {
+		bool onRow = _values[row][i] == curValue && i != col;
+		bool onCol = _values[i][col] == curValue && i != row;
+		if (onRow || onCol) {
+			return false;
+		}
+	}
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			int r = i + 3 * int(row / 3);
+			int c = j + 3 * int(col / 3);
+			if (_values[r][c] == curValue && (r != row && c != col)) {
+				return false;
+			}
+		}
+	}
+	return true;
 }
