@@ -4,14 +4,21 @@
 #include <QTextStream>
 
 SudokuModel::SudokuModel(QWidget *parent) {
-	for (int i = 0; i < SUDOKU_SIZE; ++i) {
-		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			_values[i][j] = 0;
-		}
-	}
+	resetModelValues();
 }
 
 SudokuModel::~SudokuModel() {
+}
+
+void SudokuModel::resetModelValues()
+{
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			_values[i][j].value = 0;
+			_values[i][j].isInitialValue = false;
+			_values[i][j].isValid = false;
+		}
+	}
 }
 
 QVariant SudokuModel::data(const QModelIndex &index, int role) const
@@ -21,7 +28,7 @@ QVariant SudokuModel::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole) {
 		if (0 <= index.row() || index.row() < SUDOKU_SIZE || 0 <= index.column() || index.column() < SUDOKU_SIZE)
-			return _values[index.row()][index.column()];
+			return _values[index.row()][index.column()].value;
 	} else if (role == Qt::TextAlignmentRole) {
 		return Qt::AlignHCenter | Qt::AlignVCenter;
 	} else if (role == Qt::BackgroundRole) {
@@ -33,6 +40,8 @@ QVariant SudokuModel::data(const QModelIndex &index, int role) const
 
 int SudokuModel::loadFromCsv(QString csvPath)
 {
+	resetModelValues();
+
 	QFile csv(csvPath);
 	if (!csv.exists()) {
 		std::cout << "ERROR - csv file not found at " << csvPath.toStdString() << std::endl;
@@ -65,7 +74,8 @@ int SudokuModel::loadFromCsv(QString csvPath)
 				csv.close();
 				return 3;
 			}
-			_values[rowIndex][colIndex] = splitted[colIndex].toInt();
+			_values[rowIndex][colIndex].value = splitted[colIndex].toInt();
+			_values[rowIndex][colIndex].isInitialValue = true;
 		}
 		rowIndex++;
 	}
@@ -84,7 +94,7 @@ QString SudokuModel::toString()
 	for (int i = 0; i < SUDOKU_SIZE; i++) {
 		QStringList l;
 		for (int j = 0; j < SUDOKU_SIZE; j++) {
-			l.append(QString::number(_values[i][j]));
+			l.append(QString::number(_values[i][j].value));
 		}
 		str.append(l.join(";"));
 		str.append("\n");
@@ -112,24 +122,25 @@ bool SudokuModel::isValid()
 {
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			if (!valueIsValid(i, j))
+			if (!cellIsValid(i, j))
 				return false;
 		}
 	}
 	return true;
 }
 
-bool SudokuModel::valueIsValid(int row, int col)
+bool SudokuModel::cellIsValid(int row, int col)
 {
-	int curValue = _values[row][col];
+	bool valid = true;
+	int curValue = _values[row][col].value;
 	if (curValue == 0) {
-		return true;
+		valid = true;
 	}
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
-		bool onRow = _values[row][i] == curValue && i != col;
-		bool onCol = _values[i][col] == curValue && i != row;
+		bool onRow = _values[row][i].value == curValue && i != col;
+		bool onCol = _values[i][col].value == curValue && i != row;
 		if (onRow || onCol) {
-			return false;
+			valid = false;
 		}
 	}
 
@@ -137,10 +148,11 @@ bool SudokuModel::valueIsValid(int row, int col)
 		for (int j = 0; j < SQUARE_SIZE; ++j) {
 			int r = i + SQUARE_SIZE * int(row / SQUARE_SIZE);
 			int c = j + SQUARE_SIZE * int(col / SQUARE_SIZE);
-			if (_values[r][c] == curValue && (r != row && c != col)) {
-				return false;
+			if (_values[r][c].value == curValue && (r != row && c != col)) {
+				valid = false;
 			}
 		}
 	}
-	return true;
+	_values[row][col].isValid = valid;
+	return valid;
 }

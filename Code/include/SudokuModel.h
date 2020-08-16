@@ -25,16 +25,26 @@ public:
 
 	int loadFromCsv(QString csvPath);
 
-	bool valueIsValid(int row, int col);
+	bool cellIsValid(int row, int col);
 	bool isValid();
 
 	QString toString();
 	void print();
 
+protected:
+	struct SudokuCell {
+		bool isInitialValue = false;
+		bool isValid = false;
+		int value = 0;
+	};
+	typedef struct SudokuCell SudokuCell;
+
 private slots:
 
 private:
-	int _values[SUDOKU_SIZE][SUDOKU_SIZE];
+	void resetModelValues();
+
+	SudokuCell _values[SUDOKU_SIZE][SUDOKU_SIZE];
 };
 
 #endif // SUDOKUMODEL_H
