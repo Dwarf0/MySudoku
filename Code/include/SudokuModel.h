@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QAbstractItemModel>
 #include <iostream>
+#include <qset.h>
 
 #include "globals.h"
 
@@ -25,6 +26,7 @@ public:
 
 	void setCellValue(int value, int row, int col);
 	void updateCellValidAt(int row, int col);
+	void updateCellPossibleValuesAt(int row, int col);
 	bool isValid();
 	bool isFilled();
 
@@ -41,17 +43,20 @@ protected:
 		bool isInitialValue = false;
 		bool isValid = false;
 		int value = 0;
+		QSet<int> possibleValues;
 	};
 	typedef struct SudokuCell SudokuCell;
 
 public slots:
 	void setAutocheckMode(bool autocheck) { _autocheckMode = autocheck; }
+	void displayHelp(bool displayHelp) { _displayHelp = displayHelp; }
 
 private:
 	void resetModelValues();
 
 	SudokuCell _values[SUDOKU_SIZE][SUDOKU_SIZE];
 	bool _autocheckMode;
+	bool _displayHelp;
 };
 
 #endif // SUDOKUMODEL_H

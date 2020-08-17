@@ -18,6 +18,7 @@ MySudokuViewer::MySudokuViewer(QWidget *parent) {
 	
 	connect(_mainWindowUi.actionLoadFromCsv, &QAction::triggered, this, &MySudokuViewer::loadFromCsv);
 	connect(_mainWindowUi.actionAutocheck, &QAction::triggered, _sudokuModel, &SudokuModel::setAutocheckMode);
+	connect(_mainWindowUi.actionDisplayHelp, &QAction::triggered, _sudokuModel, &SudokuModel::displayHelp);
 }
 
 MySudokuViewer::~MySudokuViewer() {

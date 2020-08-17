@@ -43,6 +43,7 @@
      <string>Settings</string>
     </property>
     <addaction name="actionAutocheck"/>
+    <addaction name="actionDisplayHelp"/>
    </widget>
    <addaction name="menuLoader"/>
    <addaction name="menuSettings"/>
@@ -61,6 +62,14 @@
    </property>
    <property name="text">
     <string>Autocheck</string>
+   </property>
+  </action>
+  <action name="actionDisplayHelp">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Display help</string>
    </property>
   </action>
  </widget>

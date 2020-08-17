@@ -7,6 +7,7 @@
 SudokuModel::SudokuModel(QWidget *parent) {
 	resetModelValues();
 	_autocheckMode = false;
+	_displayHelp = false;
 }
 
 SudokuModel::~SudokuModel() {
@@ -19,6 +20,7 @@ void SudokuModel::resetModelValues()
 			_values[i][j].value = 0;
 			_values[i][j].isInitialValue = false;
 			_values[i][j].isValid = false;
+			_values[i][j].possibleValues = { 1, 2, 3, 4 ,5 ,6 , 7, 8, 9 };
 		}
 	}
 }
@@ -27,13 +29,30 @@ QVariant SudokuModel::data(const QModelIndex &index, int role) const
 { 
 	int r = index.row();
 	int c = index.column();
-	int value = _values[index.row()][index.column()].value;
-	bool valid = _values[index.row()][index.column()].isValid;
-	bool isInitialValue = _values[index.row()][index.column()].isInitialValue;
+	SudokuCell cell = _values[index.row()][index.column()];
+	int value = cell.value;
+	bool valid = cell.isValid;
+	bool isInitialValue = cell.isInitialValue;
 
 	if (role == Qt::DisplayRole) {
 		if (value > 0) {
 			return value;
+		} else if (_displayHelp) {
+			QList<int> values;
+			foreach(int v, cell.possibleValues) {
+				values.append(v);
+			}
+			qSort(values);
+
+			QStringList strList;
+			foreach(int v, values) {
+				strList.append(QString::number(v));
+			}
+			return strList.join(" ");
+		}
+	} else if (role == Qt::TextColorRole) {
+		if (value == 0 && _displayHelp) {
+			return QColor(Qt::gray);
 		}
 	} else if (role == Qt::TextAlignmentRole) {
 		return Qt::AlignCenter;
@@ -59,6 +78,13 @@ bool SudokuModel::setData(const QModelIndex & index, const QVariant & value, int
 	int intVal = value.toInt(&ok);
 	if (ok && 1 <= intVal && intVal <= 9) {
 		setCellValue(intVal, r, c);
+
+		// TODO : gérer une liste qui contient les cells vides plutôt que tout parcourir ?
+		for (int i = 0; i < 9; ++i) {
+			for (int j = 0; j < 9; ++j) {
+				updateCellPossibleValuesAt(i, j);
+			}
+		}
 		return true;
 	}
 
@@ -119,6 +145,13 @@ int SudokuModel::loadFromCsv(QString csvPath)
 	}
 
 	csv.close();
+
+	for (int i = 0; i < 9; ++i) {
+		for (int j = 0; j < 9; ++j) {
+			updateCellPossibleValuesAt(i, j);
+		}
+	}
+
 	return 0;
 }
 
@@ -142,6 +175,24 @@ void SudokuModel::updateCellValidAt(int row, int col)
 	}
 
 	_values[row][col].isValid = valid;
+}
+
+void SudokuModel::updateCellPossibleValuesAt(int row, int col)
+{
+	if (_values[row][col].value > 0) {
+		_values[row][col].possibleValues.clear();
+	}
+	else {
+		_values[row][col].possibleValues = { 1, 2, 3, 4 ,5 ,6 , 7, 8, 9 };
+		for (int i = 0; i < SUDOKU_SIZE; ++i) {
+			_values[row][col].possibleValues.remove(_values[row][i].value);
+			_values[row][col].possibleValues.remove(_values[i][col].value);
+
+			int squareRow = (row / 3) * 3 + i % 3;
+			int squareCol = (col / 3) * 3 + i / 3;
+			_values[row][col].possibleValues.remove(_values[squareRow][squareCol].value);
+		}
+	}
 }
 
 void SudokuModel::setCellValue(int value, int row, int col)
