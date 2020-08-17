@@ -6,6 +6,7 @@
 
 SudokuModel::SudokuModel(QWidget *parent) {
 	resetModelValues();
+	_autocheckMode = false;
 }
 
 SudokuModel::~SudokuModel() {
@@ -26,19 +27,26 @@ QVariant SudokuModel::data(const QModelIndex &index, int role) const
 { 
 	int r = index.row();
 	int c = index.column();
+	int value = _values[index.row()][index.column()].value;
+	bool valid = _values[index.row()][index.column()].isValid;
+	bool isInitialValue = _values[index.row()][index.column()].isInitialValue;
 
 	if (role == Qt::DisplayRole) {
-		if (0 <= index.row() || index.row() < SUDOKU_SIZE || 0 <= index.column() || index.column() < SUDOKU_SIZE) {
-			return _values[index.row()][index.column()].value;
+		if (value > 0) {
+			return value;
 		}
 	} else if (role == Qt::TextAlignmentRole) {
 		return Qt::AlignCenter;
 	} else if (role == Qt::BackgroundRole) {
-		return (r / SQUARE_SIZE + c / SQUARE_SIZE) % 2 ? QBrush(Qt::lightGray) : QBrush(Qt::white);
+		Qt::GlobalColor color = (r / SQUARE_SIZE + c / SQUARE_SIZE) % 2 ? Qt::lightGray : Qt::white;
+		if (_autocheckMode && !isInitialValue && value > 0) {
+			color = valid ? Qt::green : Qt::red;
+		}
+		return QBrush(color);
 	} else if (role == SudokuModel::IsValidRole) {
-		return _values[index.row()][index.column()].isValid;
+		return valid;
 	} else if (role == SudokuModel::IsInitialValueRole) {
-		return _values[index.row()][index.column()].isInitialValue;
+		return isInitialValue;
 	}
 	return QVariant();
 }
@@ -50,8 +58,7 @@ bool SudokuModel::setData(const QModelIndex & index, const QVariant & value, int
 	bool ok;
 	int intVal = value.toInt(&ok);
 	if (ok && 1 <= intVal && intVal <= 9) {
-		_values[r][c].value = intVal;
-		_values[r][c].isValid = cellIsValid(r, c);
+		setCellValue(intVal, r, c);
 		return true;
 	}
 
@@ -112,11 +119,66 @@ int SudokuModel::loadFromCsv(QString csvPath)
 	}
 
 	csv.close();
-
-	if (!isValid()) {
-		return 4;
-	}
 	return 0;
+}
+
+void SudokuModel::updateCellValidAt(int row, int col)
+{
+	bool valid = true;
+	int value = _values[row][col].value;
+	if (value != 0) {
+		for (int i = 0; i < SUDOKU_SIZE; ++i) {
+			bool alreadyOnRow = _values[row][i].value == value && i != col;
+			bool alreadyOnCol = _values[i][col].value == value && i != row;
+
+			int squareRow = (row / 3) * 3 + i % 3;
+			int squareCol = (col / 3) * 3 + i / 3;
+			bool alreadyOnSquare = _values[squareRow][squareCol].value == value && squareRow != row && squareCol != col;
+			if (alreadyOnRow || alreadyOnCol || alreadyOnSquare) {
+				valid = false;
+				break;
+			}
+		}
+	}
+
+	_values[row][col].isValid = valid;
+}
+
+void SudokuModel::setCellValue(int value, int row, int col)
+{
+	_values[row][col].value = value;
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		updateCellValidAt(i, col);
+		updateCellValidAt(row, i);
+
+		int squareRow = (row / 3) * 3 + i % 3;
+		int squareCol = (col / 3) * 3 + i / 3;
+		updateCellValidAt(squareRow, squareCol);;
+	}
+}
+
+
+bool SudokuModel::isValid()
+{
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			if (!_values[i][j].isValid)
+				return false;
+		}
+	}
+	return true;
+}
+
+bool SudokuModel::isFilled()
+{
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			if (_values[i][j].value == 0) {
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 QString SudokuModel::toString() const
@@ -147,59 +209,4 @@ void SudokuModel::print() const
 	std::cout << topSep.toStdString() << std::endl;
 	std::cout << str.toStdString() << std::endl;
 	std::cout << botSep.toStdString() << std::endl;
-}
-
-bool SudokuModel::isValid()
-{
-	for (int i = 0; i < SUDOKU_SIZE; ++i) {
-		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			if (!cellIsValid(i, j))
-				return false;
-		}
-	}
-	return true;
-}
-
-bool SudokuModel::cellIsValid(int row, int col)
-{
-	_values[row][col].isValid = isValueValidAt(_values[row][col].value, row, col);
-	return _values[row][col].isValid;
-}
-
-
-bool SudokuModel::isValueValidAt(int value, int row, int col)
-{
-	if (value == 0) {
-		return true;
-	}
-	for (int i = 0; i < SUDOKU_SIZE; ++i) {
-		bool alreadyOnRow = _values[row][i].value == value && i != col;
-		bool alreadyOnCol = _values[i][col].value == value && i != row;
-		if (alreadyOnRow || alreadyOnCol) {
-			return false;
-		}
-	}
-
-	for (int i = 0; i < SQUARE_SIZE; ++i) {
-		for (int j = 0; j < SQUARE_SIZE; ++j) {
-			int r = i + SQUARE_SIZE * int(row / SQUARE_SIZE);
-			int c = j + SQUARE_SIZE * int(col / SQUARE_SIZE);
-			if (_values[r][c].value == value && (r != row && c != col)) {
-				return false;
-			}
-		}
-	}
-	return true;
-}
-
-bool SudokuModel::isFilled()
-{
-	for (int i = 0; i < SUDOKU_SIZE; ++i) {
-		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			if (_values[i][j].value == 0) {
-				return false;
-			}
-		}
-	}
-	return true;
 }

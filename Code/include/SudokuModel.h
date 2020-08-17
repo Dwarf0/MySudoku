@@ -23,8 +23,8 @@ public:
 
 	int loadFromCsv(QString csvPath);
 
-	bool isValueValidAt(int value, int row, int col);
-	bool cellIsValid(int row, int col);
+	void setCellValue(int value, int row, int col);
+	void updateCellValidAt(int row, int col);
 	bool isValid();
 	bool isFilled();
 
@@ -44,12 +44,14 @@ protected:
 	};
 	typedef struct SudokuCell SudokuCell;
 
-private slots:
+public slots:
+	void setAutocheckMode(bool autocheck) { _autocheckMode = autocheck; }
 
 private:
 	void resetModelValues();
 
 	SudokuCell _values[SUDOKU_SIZE][SUDOKU_SIZE];
+	bool _autocheckMode;
 };
 
 #endif // SUDOKUMODEL_H

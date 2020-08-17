@@ -15,8 +15,6 @@ public:
 	~SudokuDelegate();
 	
 	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-
-private:
 };
 
 #endif // SUDOKUDELEGATE_H

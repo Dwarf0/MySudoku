@@ -38,7 +38,14 @@
     </property>
     <addaction name="actionLoadFromCsv"/>
    </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="actionAutocheck"/>
+   </widget>
    <addaction name="menuLoader"/>
+   <addaction name="menuSettings"/>
   </widget>
   <action name="actionLoadFromCsv">
    <property name="checkable">
@@ -46,6 +53,14 @@
    </property>
    <property name="text">
     <string>from csv</string>
+   </property>
+  </action>
+  <action name="actionAutocheck">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Autocheck</string>
    </property>
   </action>
  </widget>
