@@ -20,8 +20,11 @@ SudokuCell::~SudokuCell() {
 
 void SudokuCell::setValue(int value)
 {
-	_value = value;
-	updateIsValid();
+	if (_value != value) {
+		_value = value;
+		updateIsValid();
+		emit valueChanged(value);
+	}
 }
 
 void SudokuCell::reset()
@@ -40,6 +43,11 @@ QList<int> SudokuCell::getPossibleValues() const
 	}
 	qSort(values);
 	return values;
+}
+
+void SudokuCell::updateCell() {
+	updateIsValid();
+	updatePossibleValues();
 }
 
 void SudokuCell::updateIsValid()
@@ -81,5 +89,7 @@ void SudokuCell::updatePossibleValues()
 			_possibleValues.remove(_model->data(_model->index(squareRow, squareCol), SudokuModel::CellValueRole).toInt());
 		}
 	}
+	// TODO : quand implémenté, ajouter un check du bool "autofill" de SudokuModel. 
+	//	      Si true et si _possibleValues n'a qu'un élément, faire un setValue
 }
 

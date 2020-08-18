@@ -9,8 +9,9 @@
 
 class SudokuModel;
 
-class SudokuCell
+class SudokuCell : public QObject
 {
+	Q_OBJECT
 public:
 	SudokuCell(SudokuModel *model = nullptr);
 	~SudokuCell();
@@ -29,6 +30,12 @@ public:
 
 	void updateIsValid();
 	void updatePossibleValues();
+
+signals:
+	void valueChanged(int value);
+
+public slots:
+	void updateCell();
 
 private:
 	bool _isInitialValue;

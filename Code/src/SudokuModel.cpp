@@ -13,11 +13,30 @@ SudokuModel::SudokuModel(QWidget *parent) {
 			_values[i][j].setRow(i);
 			_values[i][j].setColumn(j);
 			_values[i][j].setModel(this);
+			connectCell(i, j);
 		}
 	}
 }
 
 SudokuModel::~SudokuModel() {
+}
+
+void SudokuModel::connectCell(int row, int col)
+{
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		int squareRow = (row / 3) * 3 + i % 3;
+		int squareCol = (col / 3) * 3 + i / 3;
+
+		if (i != row) {
+			connect(&_values[row][col], &SudokuCell::valueChanged, &_values[i][col], &SudokuCell::updateCell);
+		}
+		if (i != col) {
+			connect(&_values[row][col], &SudokuCell::valueChanged, &_values[row][i], &SudokuCell::updateCell);
+		}
+		if (row != squareRow && col != squareCol) {
+			connect(&_values[row][col], &SudokuCell::valueChanged, &_values[squareRow][squareCol], &SudokuCell::updateCell);
+		}
+	}
 }
 
 void SudokuModel::resetModelValues()
@@ -33,17 +52,17 @@ QVariant SudokuModel::data(const QModelIndex &index, int role) const
 { 
 	int r = index.row();
 	int c = index.column();
-	SudokuCell cell = _values[index.row()][index.column()];
-	int value = cell.getValue();
-	bool valid = cell.isValid();
-	bool isInitialValue = cell.isInitialValue();
+	//SudokuCell cell = _values[index.row()][index.column()]; // Définir copie pour SudokuCell ?
+	int value = _values[index.row()][index.column()].getValue();
+	bool valid = _values[index.row()][index.column()].isValid();
+	bool isInitialValue = _values[index.row()][index.column()].isInitialValue();
 
 	if (role == Qt::DisplayRole) {
 		if (value > 0) {
 			return value;
 		} else if (_displayHelp) {
 			QStringList strList;
-			foreach(int v, cell.getPossibleValues()) {
+			foreach(int v, _values[index.row()][index.column()].getPossibleValues()) {
 				strList.append(QString::number(v));
 			}
 			return strList.join(" ");
@@ -79,9 +98,8 @@ bool SudokuModel::setData(const QModelIndex & index, const QVariant & value, int
 	int intVal = value.toInt(&ok);
 	bool isIntVal = (ok && 1 <= intVal && intVal <= 9);
 	bool isEmptyVal = value.toString().isEmpty();
-	std::cout << value.toString().toStdString() << std::endl;
 	if (isIntVal || isEmptyVal) {
-		updateCell(isEmptyVal ? 0 : intVal, r, c);
+		_values[r][c].setValue(isEmptyVal ? 0 : intVal);
 		return true;
 	}
 	return false;
@@ -150,24 +168,6 @@ int SudokuModel::loadFromCsv(QString csvPath)
 
 	return 0;
 }
-
-void SudokuModel::updateCell(int value, int row, int col)
-{
-	_values[row][col].setValue(value);
-	for (int i = 0; i < SUDOKU_SIZE; ++i) {
-		_values[i][col].updateIsValid();
-		_values[row][i].updateIsValid();
-
-		int squareRow = (row / 3) * 3 + i % 3;
-		int squareCol = (col / 3) * 3 + i / 3;
-		_values[squareRow][squareCol].updateIsValid();
-
-		_values[i][col].updatePossibleValues();
-		_values[row][i].updatePossibleValues();
-		_values[squareRow][squareCol].updatePossibleValues();
-	}
-}
-
 
 bool SudokuModel::isValid()
 {
