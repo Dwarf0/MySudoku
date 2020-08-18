@@ -56,16 +56,13 @@ QVariant SudokuModel::data(const QModelIndex &index, int role) const
 	int value = _values[index.row()][index.column()].getValue();
 	bool valid = _values[index.row()][index.column()].isValid();
 	bool isInitialValue = _values[index.row()][index.column()].isInitialValue();
+	QList<int> possibleValues = _values[index.row()][index.column()].getPossibleValues();
 
 	if (role == Qt::DisplayRole) {
 		if (value > 0) {
 			return value;
 		} else if (_displayHelp) {
-			QStringList strList;
-			foreach(int v, _values[index.row()][index.column()].getPossibleValues()) {
-				strList.append(QString::number(v));
-			}
-			return strList.join(" ");
+			return data(index, SudokuModel::PossibleValuesRole);
 		}
 	} else if (role == Qt::TextColorRole) {
 		if (value == 0 && _displayHelp) {
@@ -79,12 +76,20 @@ QVariant SudokuModel::data(const QModelIndex &index, int role) const
 			color = valid ? Qt::green : Qt::red;
 		}
 		return QBrush(color);
-	} else if (role == SudokuModel::IsValidRole) {
+	} 
+	// User Roles
+	else if (role == SudokuModel::IsValidRole) {
 		return valid;
 	} else if (role == SudokuModel::IsInitialValueRole) {
 		return isInitialValue;
 	} else if (role == SudokuModel::CellValueRole) {
 		return value;
+	} else if (role == SudokuModel::PossibleValuesRole) {
+		QStringList strList;
+		foreach(int v, possibleValues) {
+			strList.append(QString::number(v));
+		}
+		return strList.join(" ");
 	}
 
 	return QVariant();

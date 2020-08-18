@@ -38,6 +38,9 @@ public slots:
 	void updateCell();
 
 private:
+	void directValueFilter();
+	void indirectValueFilter();
+
 	bool _isInitialValue;
 	bool _isValid;
 	int _value;

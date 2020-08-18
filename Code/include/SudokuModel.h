@@ -34,7 +34,8 @@ public:
 	enum AdditionalRoles {
 		IsValidRole = Qt::UserRole+1,
 		IsInitialValueRole,
-		CellValueRole
+		CellValueRole,
+		PossibleValuesRole
 	};
 
 public slots:
