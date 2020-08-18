@@ -7,7 +7,7 @@
 #include <qset.h>
 
 #include "globals.h"
-
+#include "SudokuCell.h"
 
 class SudokuModel : public QAbstractTableModel
 {
@@ -23,10 +23,8 @@ public:
 	Qt::ItemFlags flags(const QModelIndex &index) const;
 
 	int loadFromCsv(QString csvPath);
+	void updateCell(int value, int row, int col);
 
-	void setCellValue(int value, int row, int col);
-	void updateCellValidAt(int row, int col);
-	void updateCellPossibleValuesAt(int row, int col);
 	bool isValid();
 	bool isFilled();
 
@@ -35,17 +33,9 @@ public:
 
 	enum AdditionalRoles {
 		IsValidRole = Qt::UserRole+1,
-		IsInitialValueRole
+		IsInitialValueRole,
+		CellValueRole
 	};
-
-protected:
-	struct SudokuCell {
-		bool isInitialValue = false;
-		bool isValid = false;
-		int value = 0;
-		QSet<int> possibleValues;
-	};
-	typedef struct SudokuCell SudokuCell;
 
 public slots:
 	void setAutocheckMode(bool autocheck) { _autocheckMode = autocheck; }

@@ -16,7 +16,7 @@ set(TEST_FILES
     src/main.cpp
 )
 
-add_executable(SudokuTests ${TEST_FILES} ${SOURCE_FILES} ${HEADER_FILES} ${MOC_HEADERS} ${FORMS_HEADERS})
+add_executable(SudokuTests ${TEST_FILES} ${SOURCE_FILES} ${HEADER_FILES} )
 target_link_libraries(SudokuTests ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} Qt5::Widgets)
 # target_link_libraries(SudokuTests GTest::GTest GTest::Main)
 
