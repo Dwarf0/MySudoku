@@ -43,6 +43,7 @@ public slots:
 private:
 	void directValueFilter();
 	void indirectValueFilter();
+	void noChoiceFilter();
 
 	bool _isInitialValue;
 	bool _isValid;

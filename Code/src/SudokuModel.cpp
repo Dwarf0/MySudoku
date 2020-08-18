@@ -39,7 +39,7 @@ void SudokuModel::connectCell(int row, int col)
 		if (i != col) {
 			connect(_values[row][col], &SudokuCell::valueChanged, _values[row][i], &SudokuCell::updateCell);
 		}
-		if (row != squareRow && col != squareCol) {
+		if (row != squareRow || col != squareCol) {
 			connect(_values[row][col], &SudokuCell::valueChanged, _values[squareRow][squareCol], &SudokuCell::updateCell);
 		}
 	}

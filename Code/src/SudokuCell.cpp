@@ -11,7 +11,8 @@ void SudokuCell::setValue(int value)
 {
 	if (_value != value) {
 		_value = value;
-		updateIsValid();
+		updateIsValid(); 
+		updatePossibleValues();
 		emit valueChanged(value);
 	}
 }
@@ -51,7 +52,7 @@ void SudokuCell::updateIsValid()
 			int squareRow = (_row / 3) * 3 + i % 3;
 			int squareCol = (_col / 3) * 3 + i / 3;
 			bool alreadyOnSquare = _model->data(_model->index(squareRow, squareCol), SudokuModel::CellValueRole) == _value 
-									&& squareRow != _row && squareCol != _col;
+									&& (squareRow != _row || squareCol != _col);
 			if (alreadyOnRow || alreadyOnCol || alreadyOnSquare) {
 				valid = false;
 				break;
@@ -70,7 +71,10 @@ void SudokuCell::updatePossibleValues()
 	else {
 		_possibleValues = { 1, 2, 3, 4 ,5 ,6 , 7, 8, 9 };
 		directValueFilter();
+		// TODO : il faudrait pouvoir lancer le filtrage indirect pourrait être appliqué plusieurs fois 
+		//		  (une fois des valeurs possibles supprimées par filtrage indirect, de nouvelles valeurs possibles peuvent être supprimées)
 		indirectValueFilter();
+		noChoiceFilter();
 	}
 	// TODO : quand implémenté, ajouter un check du bool "autofill" de SudokuModel. 
 	//	      Si true et si _possibleValues n'a qu'un élément, faire un setValue
@@ -153,6 +157,37 @@ void SudokuCell::indirectValueFilter()
 					_possibleValues.remove(possibleValue);
 				}
 			}
+		}
+	}
+}
+
+void SudokuCell::noChoiceFilter() 
+{
+	QSet<int> tmpPossibleValue = _possibleValues;
+	foreach(int possibleValue, tmpPossibleValue) {
+		bool onlyPlaceOnRow = true;
+		bool onlyPlaceOnCol = true;
+		bool onlyPlaceInSquare = true;
+		for (int i = 0; i < SUDOKU_SIZE; ++i) {
+			QString sameRowCellPossibleValues = _model->data(_model->index(_row, i), SudokuModel::PossibleValuesRole).toString();
+			if(sameRowCellPossibleValues.contains(QString::number(possibleValue))
+				&& i != _col)
+				onlyPlaceOnRow = false;
+			QString sameColCellPossibleValues = _model->data(_model->index(i, _col), SudokuModel::PossibleValuesRole).toString();
+			if (sameColCellPossibleValues.contains(QString::number(possibleValue))
+				&& i != _row)
+				onlyPlaceOnCol = false;
+			
+			int squareRow = (_row / 3) * 3 + i % 3;
+			int squareCol = (_col / 3) * 3 + i / 3;
+			QString sameSquareCellPossibleValues = _model->data(_model->index(squareRow, squareCol), SudokuModel::PossibleValuesRole).toString();
+			if (sameSquareCellPossibleValues.contains(QString::number(possibleValue))
+				&& (squareRow != _row || squareCol != _col))
+				onlyPlaceInSquare = false;
+		}
+		if (onlyPlaceOnRow || onlyPlaceOnCol || onlyPlaceInSquare) {
+			_possibleValues = { possibleValue };
+			return;
 		}
 	}
 }
