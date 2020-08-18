@@ -13,8 +13,11 @@ class SudokuCell : public QObject
 {
 	Q_OBJECT
 public:
-	SudokuCell(SudokuModel *model = nullptr);
-	~SudokuCell();
+	SudokuCell(SudokuModel *model = nullptr, int row = -1, int col = -1) :
+		_model(model), _row(row), _col(col), _value(0), _isInitialValue(false), _isValid(false), _possibleValues({ 1, 2, 3, 4 ,5 ,6 , 7, 8, 9 })
+	{}
+
+	~SudokuCell() {}
 
 	void setRow(int row) { _row = row; };
 	void setColumn(int col) { _col = col; };

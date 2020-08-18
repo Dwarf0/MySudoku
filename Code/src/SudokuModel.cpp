@@ -5,20 +5,26 @@
 #include <QBrush>
 
 SudokuModel::SudokuModel(QWidget *parent) {
-	resetModelValues();
 	_autocheckMode = false;
 	_displayHelp = false;
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			_values[i][j].setRow(i);
-			_values[i][j].setColumn(j);
-			_values[i][j].setModel(this);
+			_values[i][j] = new SudokuCell(this, i, j);
+		}
+	}
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
 			connectCell(i, j);
 		}
 	}
 }
 
 SudokuModel::~SudokuModel() {
+	for (int i = 0; i < SUDOKU_SIZE; ++i){
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			delete _values[i][j];
+		}
+	}
 }
 
 void SudokuModel::connectCell(int row, int col)
@@ -28,13 +34,13 @@ void SudokuModel::connectCell(int row, int col)
 		int squareCol = (col / 3) * 3 + i / 3;
 
 		if (i != row) {
-			connect(&_values[row][col], &SudokuCell::valueChanged, &_values[i][col], &SudokuCell::updateCell);
+			connect(_values[row][col], &SudokuCell::valueChanged, _values[i][col], &SudokuCell::updateCell);
 		}
 		if (i != col) {
-			connect(&_values[row][col], &SudokuCell::valueChanged, &_values[row][i], &SudokuCell::updateCell);
+			connect(_values[row][col], &SudokuCell::valueChanged, _values[row][i], &SudokuCell::updateCell);
 		}
 		if (row != squareRow && col != squareCol) {
-			connect(&_values[row][col], &SudokuCell::valueChanged, &_values[squareRow][squareCol], &SudokuCell::updateCell);
+			connect(_values[row][col], &SudokuCell::valueChanged, _values[squareRow][squareCol], &SudokuCell::updateCell);
 		}
 	}
 }
@@ -43,7 +49,7 @@ void SudokuModel::resetModelValues()
 {
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			_values[i][j].reset();
+			_values[i][j]->reset();
 		}
 	}
 }
@@ -52,11 +58,11 @@ QVariant SudokuModel::data(const QModelIndex &index, int role) const
 { 
 	int r = index.row();
 	int c = index.column();
-	//SudokuCell cell = _values[index.row()][index.column()]; // Définir copie pour SudokuCell ?
-	int value = _values[index.row()][index.column()].getValue();
-	bool valid = _values[index.row()][index.column()].isValid();
-	bool isInitialValue = _values[index.row()][index.column()].isInitialValue();
-	QList<int> possibleValues = _values[index.row()][index.column()].getPossibleValues();
+	SudokuCell *cell = _values[index.row()][index.column()];
+	int value = cell->getValue();
+	bool valid = cell->isValid();
+	bool isInitialValue = cell->isInitialValue();
+	QList<int> possibleValues = cell->getPossibleValues();
 
 	if (role == Qt::DisplayRole) {
 		if (value > 0) {
@@ -104,7 +110,7 @@ bool SudokuModel::setData(const QModelIndex & index, const QVariant & value, int
 	bool isIntVal = (ok && 1 <= intVal && intVal <= 9);
 	bool isEmptyVal = value.toString().isEmpty();
 	if (isIntVal || isEmptyVal) {
-		_values[r][c].setValue(isEmptyVal ? 0 : intVal);
+		_values[r][c]->setValue(isEmptyVal ? 0 : intVal);
 		return true;
 	}
 	return false;
@@ -113,7 +119,7 @@ bool SudokuModel::setData(const QModelIndex & index, const QVariant & value, int
 Qt::ItemFlags SudokuModel::flags(const QModelIndex &index) const
 {
 	Qt::ItemFlags f = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
-	if (!_values[index.row()][index.column()].isInitialValue()) {
+	if (!_values[index.row()][index.column()]->isInitialValue()) {
 		f |= Qt::ItemIsEditable;
 	}
 	return f;
@@ -155,9 +161,9 @@ int SudokuModel::loadFromCsv(QString csvPath)
 				csv.close();
 				return 3;
 			}
-			_values[rowIndex][colIndex].setValue(val);
+			_values[rowIndex][colIndex]->setValue(val);
 			if (val) {
-				_values[rowIndex][colIndex].setInitialValue(true);
+				_values[rowIndex][colIndex]->setInitialValue(true);
 			}
 		}
 		rowIndex++;
@@ -167,7 +173,7 @@ int SudokuModel::loadFromCsv(QString csvPath)
 
 	for (int i = 0; i < 9; ++i) {
 		for (int j = 0; j < 9; ++j) {
-			_values[i][j].updatePossibleValues();
+			_values[i][j]->updatePossibleValues();
 		}
 	}
 
@@ -178,7 +184,7 @@ bool SudokuModel::isValid()
 {
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			if (!_values[i][j].isValid())
+			if (!_values[i][j]->isValid())
 				return false;
 		}
 	}
@@ -189,7 +195,7 @@ bool SudokuModel::isFilled()
 {
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			if (_values[i][j].getValue() == 0) {
+			if (_values[i][j]->getValue() == 0) {
 				return false;
 			}
 		}
@@ -203,7 +209,7 @@ QString SudokuModel::toString() const
 	for (int i = 0; i < SUDOKU_SIZE; i++) {
 		QStringList l;
 		for (int j = 0; j < SUDOKU_SIZE; j++) {
-			l.append(QString::number(_values[i][j].getValue()));
+			l.append(QString::number(_values[i][j]->getValue()));
 		}
 		str.append(l.join(";"));
 		str.append("\n");

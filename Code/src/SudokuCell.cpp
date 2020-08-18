@@ -6,17 +6,6 @@
 
 #include "SudokuModel.h"
 
-SudokuCell::SudokuCell(SudokuModel *model) {
-	_isInitialValue = false;
-	_isValid = false;
-	_value = 0;
-	_row = -1;
-	_col = -1;
-	_model = model;
-}
-
-SudokuCell::~SudokuCell() {
-}
 
 void SudokuCell::setValue(int value)
 {

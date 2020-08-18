@@ -46,7 +46,7 @@ private:
 	void resetModelValues();
 	void connectCell(int row, int col);
 
-	SudokuCell _values[SUDOKU_SIZE][SUDOKU_SIZE];
+	SudokuCell *_values[SUDOKU_SIZE][SUDOKU_SIZE];
 	bool _autocheckMode;
 	bool _displayHelp;
 };
