@@ -74,6 +74,7 @@ void SudokuCell::updatePossibleValues()
 		// TODO : il faudrait pouvoir lancer le filtrage indirect pourrait être appliqué plusieurs fois 
 		//		  (une fois des valeurs possibles supprimées par filtrage indirect, de nouvelles valeurs possibles peuvent être supprimées)
 		indirectValueFilter();
+		groupValueFilter();
 		noChoiceFilter();
 	}
 	// TODO : quand implémenté, ajouter un check du bool "autofill" de SudokuModel. 
@@ -156,6 +157,50 @@ void SudokuCell::indirectValueFilter()
 					// alors notre valeur n'est finalement pas possible
 					_possibleValues.remove(possibleValue);
 				}
+			}
+		}
+	}
+}
+
+void SudokuCell::groupValueFilter()
+{
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		int squareRow = (_row / 3) * 3 + i % 3;
+		int squareCol = (_col / 3) * 3 + i / 3;
+
+		QString sameRowCellPossibleValues = _model->data(_model->index(_row, i), SudokuModel::PossibleValuesRole).toString();
+		QString sameColCellPossibleValues = _model->data(_model->index(i, _col), SudokuModel::PossibleValuesRole).toString();
+		QString sameSquareCellPossibleValues = _model->data(_model->index(squareRow, squareCol), SudokuModel::PossibleValuesRole).toString();
+		int sameRowPossible = 0;
+		int sameColPossible = 0;
+		int sameSquarePossible = 0;
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			if (_col != j && _model->data(_model->index(_row, j), SudokuModel::PossibleValuesRole).toString() == sameRowCellPossibleValues) {
+				++sameRowPossible;
+			}
+			if (_row != j && _model->data(_model->index(j, _col), SudokuModel::PossibleValuesRole).toString() == sameColCellPossibleValues) {
+				++sameColPossible;
+			}
+			int tmpSquareRow = (_row / 3) * 3 + j % 3;
+			int tmpSquareCol = (_col / 3) * 3 + j / 3;
+			if ((_row != tmpSquareRow || _col != tmpSquareCol) 
+				&& _model->data(_model->index(tmpSquareRow, tmpSquareCol), SudokuModel::PossibleValuesRole).toString() == sameSquareCellPossibleValues) {
+				++sameSquarePossible;
+			}
+		}
+		if (sameRowCellPossibleValues.split(" ").size() == sameRowPossible) {
+			foreach(QString v, sameRowCellPossibleValues.split(" ")) {
+				_possibleValues.remove(v.toInt());
+			}
+		}
+		if (sameColCellPossibleValues.split(" ").size() == sameColPossible) {
+			foreach(QString v, sameColCellPossibleValues.split(" ")) {
+				_possibleValues.remove(v.toInt());
+			}
+		}
+		if (sameSquareCellPossibleValues.split(" ").size() == sameSquarePossible) {
+			foreach(QString v, sameSquareCellPossibleValues.split(" ")) {
+				_possibleValues.remove(v.toInt());
 			}
 		}
 	}

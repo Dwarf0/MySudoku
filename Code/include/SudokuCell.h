@@ -43,6 +43,7 @@ public slots:
 private:
 	void directValueFilter();
 	void indirectValueFilter();
+	void groupValueFilter();
 	void noChoiceFilter();
 
 	bool _isInitialValue;
