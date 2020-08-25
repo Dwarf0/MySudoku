@@ -11,9 +11,14 @@ void SudokuCell::setValue(int value)
 {
 	if (_value != value) {
 		_value = value;
-		updateIsValid(); 
-		updatePossibleValues();
-		emit valueChanged(value);
+		if (_value == 0) {
+			_possibleValues = { 1, 2, 3, 4 ,5 , 6, 7, 8, 9 };
+			updatePossibleValues();
+		} else {
+			_possibleValues.clear();
+			updateIsValid();
+		}
+		if (_emitEnabled) emit valueChanged(value);
 	}
 }
 
@@ -22,7 +27,7 @@ void SudokuCell::reset()
 	_value = 0;
 	_isInitialValue = false;
 	_isValid = false;
-	_possibleValues = { 1, 2, 3, 4 ,5 ,6 , 7, 8, 9 };
+	_possibleValues = { 1, 2, 3, 4 ,5 , 6, 7, 8, 9 };
 }
 
 QList<int> SudokuCell::getPossibleValues() const
@@ -67,34 +72,42 @@ void SudokuCell::updatePossibleValues()
 {
 	if (_value > 0) {
 		_possibleValues.clear();
+		return;
 	}
-	else {
-		_possibleValues = { 1, 2, 3, 4 ,5 ,6 , 7, 8, 9 };
-		directValueFilter();
-		// TODO : il faudrait pouvoir lancer le filtrage indirect pourrait être appliqué plusieurs fois 
-		//		  (une fois des valeurs possibles supprimées par filtrage indirect, de nouvelles valeurs possibles peuvent être supprimées)
-		indirectValueFilter();
-		groupValueFilter();
-		noChoiceFilter();
+	if (_possibleValues.size() == 1) {
+		return;
 	}
+	bool changed = false;
+	// TODO : si à l'issue d'un filtre, on ne se retrouve avec qu'une seule valeur possible, 
+	//        alors les autres filtres ne devraient pas être lancés
+	changed |= directValueFilter();
+	changed |= indirectValueFilter();
+	changed |= groupValueFilter();
+	changed |= noChoiceFilter();
+
 	// TODO : quand implémenté, ajouter un check du bool "autofill" de SudokuModel. 
 	//	      Si true et si _possibleValues n'a qu'un élément, faire un setValue
+
+	if (changed && _emitEnabled) emit possibleValuesChanged();
 }
 
-void SudokuCell::directValueFilter()
+bool SudokuCell::directValueFilter()
 {
+	bool changed = false;
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
-		_possibleValues.remove(_model->data(_model->index(_row, i), SudokuModel::CellValueRole).toInt());
-		_possibleValues.remove(_model->data(_model->index(i, _col), SudokuModel::CellValueRole).toInt());
+		changed |= _possibleValues.remove(_model->data(_model->index(_row, i), SudokuModel::CellValueRole).toInt());
+		changed |= _possibleValues.remove(_model->data(_model->index(i, _col), SudokuModel::CellValueRole).toInt());
 
 		int squareRow = (_row / 3) * 3 + i % 3;
 		int squareCol = (_col / 3) * 3 + i / 3;
-		_possibleValues.remove(_model->data(_model->index(squareRow, squareCol), SudokuModel::CellValueRole).toInt());
+		changed |= _possibleValues.remove(_model->data(_model->index(squareRow, squareCol), SudokuModel::CellValueRole).toInt());
 	}
+	return changed;
 }
 
-void SudokuCell::indirectValueFilter()
+bool SudokuCell::indirectValueFilter()
 {
+	bool changed = false;
 	QSet<int> tmpPossibleValue = _possibleValues;
 	foreach(int possibleValue, tmpPossibleValue) {
 		int squarePosRow = (_row / 3) * 3;
@@ -127,7 +140,7 @@ void SudokuCell::indirectValueFilter()
 				// si non (i.e. la possibleValue ne peut être que sur notre colonne),
 				if (isOnlyInCol) {
 					// alors notre valeur n'est finalement pas possible
-					_possibleValues.remove(possibleValue);
+					changed |= _possibleValues.remove(possibleValue);
 				}
 			}
 			if (i != squarePosCol) {
@@ -155,15 +168,17 @@ void SudokuCell::indirectValueFilter()
 				// si non (i.e. la possibleValue ne peut être que sur notre colonne),
 				if (isOnlyInRow) {
 					// alors notre valeur n'est finalement pas possible
-					_possibleValues.remove(possibleValue);
+					changed |= _possibleValues.remove(possibleValue);
 				}
 			}
 		}
 	}
+	return changed;
 }
 
-void SudokuCell::groupValueFilter()
+bool SudokuCell::groupValueFilter()
 {
+	bool changed = false;
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		int squareRow = (_row / 3) * 3 + i % 3;
 		int squareCol = (_col / 3) * 3 + i / 3;
@@ -190,24 +205,26 @@ void SudokuCell::groupValueFilter()
 		}
 		if (sameRowCellPossibleValues.split(" ").size() == sameRowPossible) {
 			foreach(QString v, sameRowCellPossibleValues.split(" ")) {
-				_possibleValues.remove(v.toInt());
+				changed |= _possibleValues.remove(v.toInt());
 			}
 		}
 		if (sameColCellPossibleValues.split(" ").size() == sameColPossible) {
 			foreach(QString v, sameColCellPossibleValues.split(" ")) {
-				_possibleValues.remove(v.toInt());
+				changed |= _possibleValues.remove(v.toInt());
 			}
 		}
 		if (sameSquareCellPossibleValues.split(" ").size() == sameSquarePossible) {
 			foreach(QString v, sameSquareCellPossibleValues.split(" ")) {
-				_possibleValues.remove(v.toInt());
+				changed |= _possibleValues.remove(v.toInt());
 			}
 		}
 	}
+	return changed;
 }
 
-void SudokuCell::noChoiceFilter() 
+bool SudokuCell::noChoiceFilter()
 {
+	bool changed = false;
 	QSet<int> tmpPossibleValue = _possibleValues;
 	foreach(int possibleValue, tmpPossibleValue) {
 		bool onlyPlaceOnRow = true;
@@ -231,8 +248,10 @@ void SudokuCell::noChoiceFilter()
 				onlyPlaceInSquare = false;
 		}
 		if (onlyPlaceOnRow || onlyPlaceOnCol || onlyPlaceInSquare) {
+			changed = _possibleValues == QSet<int>{ possibleValue };
 			_possibleValues = { possibleValue };
-			return;
+			break;
 		}
 	}
+	return changed;
 }

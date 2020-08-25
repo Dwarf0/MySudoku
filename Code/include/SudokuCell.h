@@ -14,7 +14,7 @@ class SudokuCell : public QObject
 	Q_OBJECT
 public:
 	SudokuCell(SudokuModel *model = nullptr, int row = -1, int col = -1) :
-		_model(model), _row(row), _col(col), _value(0), _isInitialValue(false), _isValid(false), _possibleValues({ 1, 2, 3, 4 ,5 ,6 , 7, 8, 9 })
+		_model(model), _row(row), _col(col), _value(0), _isInitialValue(false), _isValid(false), _possibleValues({ 1, 2, 3, 4 ,5 ,6 , 7, 8, 9 }), _emitEnabled(false)
 	{}
 
 	~SudokuCell() {}
@@ -33,18 +33,21 @@ public:
 
 	void updateIsValid();
 	void updatePossibleValues();
+	void enableEmittingSignals() { _emitEnabled = true; }
+	void disableEmittingSignals() { _emitEnabled = false; }
 
 signals:
 	void valueChanged(int value);
+	void possibleValuesChanged();
 
 public slots:
 	void updateCell();
 
 private:
-	void directValueFilter();
-	void indirectValueFilter();
-	void groupValueFilter();
-	void noChoiceFilter();
+	bool directValueFilter();
+	bool indirectValueFilter();
+	bool groupValueFilter();
+	bool noChoiceFilter();
 
 	bool _isInitialValue;
 	bool _isValid;
@@ -54,6 +57,7 @@ private:
 	int _row;
 	int _col;
 	SudokuModel *_model;
+	bool _emitEnabled;
 };
 
 #endif // SUDOKUCELL_H

@@ -35,23 +35,46 @@ void SudokuModel::connectCell(int row, int col)
 
 		if (i != row) {
 			connect(_values[row][col], &SudokuCell::valueChanged, _values[i][col], &SudokuCell::updateCell);
+			connect(_values[row][col], &SudokuCell::possibleValuesChanged, _values[i][col], &SudokuCell::updateCell);
 		}
 		if (i != col) {
 			connect(_values[row][col], &SudokuCell::valueChanged, _values[row][i], &SudokuCell::updateCell);
+			connect(_values[row][col], &SudokuCell::possibleValuesChanged, _values[row][i], &SudokuCell::updateCell);
 		}
 		if (row != squareRow || col != squareCol) {
 			connect(_values[row][col], &SudokuCell::valueChanged, _values[squareRow][squareCol], &SudokuCell::updateCell);
+			connect(_values[row][col], &SudokuCell::possibleValuesChanged, _values[squareRow][squareCol], &SudokuCell::updateCell);
+		}
+	}
+}
+
+void SudokuModel::disableCellsSignals()
+{
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			_values[i][j]->disableEmittingSignals();
+		}
+	}
+}
+
+void SudokuModel::enableCellsSignals()
+{
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			_values[i][j]->enableEmittingSignals();
 		}
 	}
 }
 
 void SudokuModel::resetModelValues()
 {
+	disableCellsSignals();
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
 			_values[i][j]->reset();
 		}
 	}
+	enableCellsSignals();
 }
 
 QVariant SudokuModel::data(const QModelIndex &index, int role) const
@@ -138,6 +161,7 @@ int SudokuModel::loadFromCsv(QString csvPath)
 	QTextStream textStream(&csv);
 	QString line;
 	int rowIndex = 0;
+	disableCellsSignals();
 	while (textStream.readLineInto(&line)) {
 		if (line.isEmpty()) {
 			continue;
@@ -147,6 +171,7 @@ int SudokuModel::loadFromCsv(QString csvPath)
 		if (splitted.size() != SUDOKU_SIZE) {
 			std::cout << "ERROR - wrong number of values at row " << rowIndex << " of csv file " << csvPath.toStdString() << std::endl;
 			csv.close();
+			resetModelValues();
 			return 2;
 		}
 		bool ok = true;
@@ -159,6 +184,7 @@ int SudokuModel::loadFromCsv(QString csvPath)
 							<< " could not be converted to int"
 							<< std::endl;
 				csv.close();
+				resetModelValues();
 				return 3;
 			}
 			_values[rowIndex][colIndex]->setValue(val);
@@ -168,11 +194,11 @@ int SudokuModel::loadFromCsv(QString csvPath)
 		}
 		rowIndex++;
 	}
-
 	csv.close();
+	enableCellsSignals();
 
-	for (int i = 0; i < 9; ++i) {
-		for (int j = 0; j < 9; ++j) {
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
 			_values[i][j]->updatePossibleValues();
 		}
 	}

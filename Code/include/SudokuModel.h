@@ -45,6 +45,8 @@ public slots:
 private:
 	void resetModelValues();
 	void connectCell(int row, int col);
+	void disableCellsSignals();
+	void enableCellsSignals();
 
 	SudokuCell *_values[SUDOKU_SIZE][SUDOKU_SIZE];
 	bool _autocheckMode;
