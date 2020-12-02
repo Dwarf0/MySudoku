@@ -3,7 +3,8 @@ find_package(GTest REQUIRED)
 
 include_directories(
     ${GTEST_INCLUDE_DIRS}
-    ./include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/Code/solver/include 
 )
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
@@ -16,8 +17,8 @@ set(TEST_FILES
     src/main.cpp
 )
 
-add_executable(SudokuTests ${TEST_FILES} ${SOURCE_FILES} ${HEADER_FILES} )
-target_link_libraries(SudokuTests ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} Qt5::Widgets)
+add_executable(SudokuTests ${TEST_FILES} ${MOC_HEADERS} ${FORMS_HEADERS} ${HEADER_FILES} )
+target_link_libraries(SudokuTests SudokuSolver ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} Qt5::Widgets)
 # target_link_libraries(SudokuTests GTest::GTest GTest::Main)
 
 gtest_add_tests(

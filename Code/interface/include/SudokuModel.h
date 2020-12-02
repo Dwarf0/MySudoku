@@ -7,7 +7,7 @@
 #include <qset.h>
 
 #include "globals.h"
-#include "SudokuCell.h"
+#include "Sudoku.h"
 
 class SudokuModel : public QAbstractTableModel
 {
@@ -23,7 +23,9 @@ public:
 	Qt::ItemFlags flags(const QModelIndex &index) const;
 
 	int loadFromCsv(QString csvPath);
-	void updateCell(int value, int row, int col);
+	void updateCell(int value, int row, int col); 
+	void updateCellsPossibleValues();
+	QList<int> getPossibleValues(int r, int c);
 
 	bool isValid();
 	bool isFilled();
@@ -38,9 +40,11 @@ public:
 		PossibleValuesRole
 	};
 
+	void applyFilter(int filterType);
+
 public slots:
 	void setAutocheckMode(bool autocheck) { _autocheckMode = autocheck; }
-	void displayHelp(bool displayHelp) { _displayHelp = displayHelp; }
+	void displayHelp(bool displayHelp);
 
 private:
 	void resetModelValues();
@@ -48,9 +52,10 @@ private:
 	void disableCellsSignals();
 	void enableCellsSignals();
 
-	SudokuCell *_values[SUDOKU_SIZE][SUDOKU_SIZE];
 	bool _autocheckMode;
 	bool _displayHelp;
+
+	Sudoku *_sudoku;
 };
 
 #endif // SUDOKUMODEL_H
