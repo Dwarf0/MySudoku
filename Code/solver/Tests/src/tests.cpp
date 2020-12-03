@@ -11,7 +11,6 @@ TEST(load_csv_testcase, load_csv_ok)
 	int err = sudoku.loadFromCsv(path+"/data/hard.csv");
     EXPECT_EQ(err, 0);
 	EXPECT_EQ(sudoku.isValid(), true);
-	
 }
 
 TEST(load_csv_testcase, load_csv_invalid)

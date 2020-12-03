@@ -1,9 +1,11 @@
 
+set(PROJECT_NAME MySudoku)
+set(PROJECT_BIN_DIR C:/Sandbox/Binaries/${PROJECT_NAME})
+project(${PROJECT_NAME})
 
 # Files
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR} 
-    ${CMAKE_SOURCE_DIR}/Code/global_include 
     ${CMAKE_SOURCE_DIR}/Code/solver/include 
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )

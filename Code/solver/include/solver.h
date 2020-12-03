@@ -1,3 +1,5 @@
+#ifndef SOLVER_H
+#define SOLVER_H
 
 #include "Sudoku.h"
 
@@ -19,3 +21,5 @@ QSet<int>  groupValueFilter(Sudoku *sudoku, int row, int col);
 QSet<int>  noChoiceFilter(Sudoku *sudoku, int row, int col);
 
 void createCombinations(QSet<int> inList, QSet<int> toAdd, QList<QSet<int> > &outList);
+
+#endif
