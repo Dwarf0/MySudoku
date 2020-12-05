@@ -3,23 +3,25 @@
 
 #include "Sudoku.h"
 
-enum FilterTypes {
-	Direct, 
-	Indirect,
-	Group,
-	HiddenGroup
-};
+namespace solver{
 
-// bool updatePossibleValues(Sudoku *sudoku);
+	enum FilterTypes {
+		Direct=1, 
+		Indirect=2,
+		Group=4,
+		HiddenGroup=8,
+		NoChoice = 16,
+	};
 
-bool applyFilter(Sudoku *sudoku, int filterType);
-QSet<int>  directValueFilter(Sudoku *sudoku, int row, int col);
-QSet<int>  indirectValueFilter(Sudoku *sudoku, int row, int col);
-QSet<int>  hiddenGroupValueFilter(Sudoku *sudoku, int row, int col);
+	bool updatePossibleValues(Sudoku *sudoku, int filterType = 0);
 
-QSet<int>  groupValueFilter(Sudoku *sudoku, int row, int col);
-QSet<int>  noChoiceFilter(Sudoku *sudoku, int row, int col);
+	bool applyFilterOnCell(Sudoku *sudoku, int filterType, int row, int col);
+	QSet<int> directValueFilter(Sudoku *sudoku, int row, int col);
+	QSet<int> indirectValueFilter(Sudoku *sudoku, int row, int col);
+	QSet<int> groupValueFilter(Sudoku *sudoku, int row, int col);
+	QSet<int> hiddenGroupValueFilter(Sudoku *sudoku, int row, int col);
+	QSet<int> noChoiceFilter(Sudoku *sudoku, int row, int col);
 
-void createCombinations(QSet<int> inList, QSet<int> toAdd, QList<QSet<int> > &outList);
-
+	void createCombinations(QSet<int> inList, QSet<int> toAdd, QList<QSet<int> > &outList);
+}
 #endif

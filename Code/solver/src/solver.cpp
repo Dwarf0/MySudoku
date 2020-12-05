@@ -1,75 +1,82 @@
 ﻿#include "solver.h"
 
 
-bool applyFilter(Sudoku *sudoku, int filterType)
+bool solver::updatePossibleValues(Sudoku *sudoku, int filterType/*=0*/)
 {
 	bool changed = false;
 
+	// TODO : ajouter un "while( !converged ){ ... }" avec converged qui récupère le retour de applyFilter ?
+	//		  sachant que chercher une convergence a pas toujours de sens selon le filtre (surtout pour filtre direct)
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			QSet<int> possibleValues;
-			if (filterType == Direct)
-				possibleValues = directValueFilter(sudoku, i, j);
-			else if (filterType == Indirect)
-				possibleValues = indirectValueFilter(sudoku, i, j);
-			else if (filterType == Group)
-				possibleValues = groupValueFilter(sudoku, i, j);
-			else if (filterType == HiddenGroup)
-				possibleValues = hiddenGroupValueFilter(sudoku, i, j);
-			if (possibleValues != sudoku->getPossibleValues(i, j)) {
-				sudoku->setPossibleValues(i, j, possibleValues);
-				changed = true;
-			}
+			changed |= applyFilterOnCell(sudoku, filterType, i, j);
 		}
 	}
+
 	return changed;
 }
 
-//bool updatePossibleValues(Sudoku *sudoku)
-//{
-//	if (_value > 0) {
-//		_possibleValues.clear();
-//		return;
-//	}
-//	if (_possibleValues.size() == 1) {
-//		return;
-//	}
-//	bool changed = false;
-//	// TODO : si à l'issue d'un filtre, on ne se retrouve avec qu'une seule valeur possible, 
-//	//        alors les autres filtres ne devraient pas être lancés
-//	//changed |= directValueFilter();
-//	//changed |= indirectValueFilter();
-//	//changed |= groupValueFilter();
-//	noChoiceFilter(); //changed |= noChoiceFilter();
-//					  //changed |= hiddenGroupValueFilter();
-//
-//					  // TODO : quand implémenté, ajouter un check du bool "autofill" de SudokuModel. 
-//					  //	      Si true et si _possibleValues n'a qu'un élément, faire un setValue
-//
-//	return changed;
-//}
-
-QSet<int> directValueFilter(Sudoku *sudoku, int row, int col)
+bool solver::applyFilterOnCell(Sudoku *sudoku, int filterType, int row, int col)
 {
-	int value = sudoku->getValue(row, col);
-	QSet<int> possibleValues = sudoku->getPossibleValues(row, col);
+	bool changed = false;
+
+	// TODO : si à l'issue d'un filtre, on ne se retrouve avec qu'une seule valeur possible, 
+	//        alors les autres filtres ne devraient pas être lancés
+
+	QSet<int> possibleValues;
+	if (possibleValues.size() != 1 && filterType & Direct) {
+		possibleValues = directValueFilter(sudoku, row, col);
+		changed = possibleValues != sudoku->getCellPossibleValues(row, col);
+		sudoku->setCellPossibleValues(row, col, possibleValues);
+	}
+	if (possibleValues.size() != 1 && filterType & Indirect) {
+		possibleValues = indirectValueFilter(sudoku, row, col);
+		changed = possibleValues != sudoku->getCellPossibleValues(row, col);
+		sudoku->setCellPossibleValues(row, col, possibleValues);
+	}
+	if (possibleValues.size() != 1 && filterType & Group) {
+		possibleValues = groupValueFilter(sudoku, row, col);
+		changed = possibleValues != sudoku->getCellPossibleValues(row, col);
+		sudoku->setCellPossibleValues(row, col, possibleValues);
+	}
+	if (possibleValues.size() != 1 && filterType & HiddenGroup) {
+		possibleValues = hiddenGroupValueFilter(sudoku, row, col);
+		changed = possibleValues != sudoku->getCellPossibleValues(row, col);
+		sudoku->setCellPossibleValues(row, col, possibleValues);
+	}
+	if (possibleValues.size() != 1 && filterType & NoChoice) {
+		possibleValues = noChoiceFilter(sudoku, row, col);
+		changed = possibleValues != sudoku->getCellPossibleValues(row, col);
+		sudoku->setCellPossibleValues(row, col, possibleValues);
+	}
+
+	return changed;
+}
+
+QSet<int> solver::directValueFilter(Sudoku *sudoku, int row, int col)
+{
+	int value = sudoku->getCellValue(row, col);
+	QSet<int> possibleValues = sudoku->getCellPossibleValues(row, col);
 
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
-		possibleValues.remove(sudoku->getValue(row, i));
-		possibleValues.remove(sudoku->getValue(i, col));
+		if(i != col)
+			possibleValues.remove(sudoku->getCellValue(row, i));
+		if (i != row)
+			possibleValues.remove(sudoku->getCellValue(i, col));
 
 		int squareRow = (row / 3) * 3 + i % 3;
 		int squareCol = (col / 3) * 3 + i / 3;
-		possibleValues.remove(sudoku->getValue(squareRow, squareCol));
+		if(i!= row && i != col)
+			possibleValues.remove(sudoku->getCellValue(squareRow, squareCol));
 	}
 
 	return possibleValues;
 }
 
-QSet<int> indirectValueFilter(Sudoku *sudoku, int row, int col)
+QSet<int> solver::indirectValueFilter(Sudoku *sudoku, int row, int col)
 {
-	int value = sudoku->getValue(row, col);
-	QSet<int> possibleValues = sudoku->getPossibleValues(row, col);
+	int value = sudoku->getCellValue(row, col);
+	QSet<int> possibleValues = sudoku->getCellPossibleValues(row, col);
 	QSet<int> tmpPossibleValue = possibleValues;
 
 	foreach(int possibleValue, tmpPossibleValue) {
@@ -86,13 +93,13 @@ QSet<int> indirectValueFilter(Sudoku *sudoku, int row, int col)
 					int squareCol = (col / 3) * 3 + j / 3;
 
 					// si la valeur est déjà présente dans le carré
-					int curCellValue = sudoku->getValue(squareRow, squareCol);
+					int curCellValue = sudoku->getCellValue(squareRow, squareCol);
 					if (curCellValue == possibleValue) {
 						isOnlyInCol = false;
 						break;
 					}
 
-					QSet<int> values = sudoku->getPossibleValues(squareRow, squareCol);
+					QSet<int> values = sudoku->getCellPossibleValues(squareRow, squareCol);
 					// si la possibleValue est possible sur d'autres colonnes que la notre
 					if (values.contains(possibleValue) && squareCol != col) {
 						isOnlyInCol = false;
@@ -113,13 +120,13 @@ QSet<int> indirectValueFilter(Sudoku *sudoku, int row, int col)
 					int squareCol = (i / 3) * 3 + j / 3;
 
 					// si la valeur est déjà présente dans le carré
-					int curCellValue = sudoku->getValue(squareRow, squareCol);
+					int curCellValue = sudoku->getCellValue(squareRow, squareCol);
 					if (curCellValue == possibleValue) {
 						isOnlyInRow = false;
 						break;
 					}
 
-					QSet<int> values = sudoku->getPossibleValues(squareRow, squareCol);
+					QSet<int> values = sudoku->getCellPossibleValues(squareRow, squareCol);
 					// si la possibleValue est possible sur d'autres colonnes que la notre
 					if (values.contains(possibleValue) && squareRow != row) {
 						isOnlyInRow = false;
@@ -134,14 +141,14 @@ QSet<int> indirectValueFilter(Sudoku *sudoku, int row, int col)
 			}
 		}
 	}
-	sudoku->setPossibleValues(row, col, possibleValues);
+
 	return possibleValues;
 }
 
-QSet<int> hiddenGroupValueFilter(Sudoku *sudoku, int row, int col)
+QSet<int> solver::hiddenGroupValueFilter(Sudoku *sudoku, int row, int col)
 {
-	int value = sudoku->getValue(row, col);
-	QSet<int> possibleValues = sudoku->getPossibleValues(row, col);
+	int value = sudoku->getCellValue(row, col);
+	QSet<int> possibleValues = sudoku->getCellPossibleValues(row, col);
 	
 	QList<QSet<int> > allSets;
 	createCombinations(QSet<int>(), possibleValues, allSets);
@@ -152,7 +159,7 @@ QSet<int> hiddenGroupValueFilter(Sudoku *sudoku, int row, int col)
 		for (int i = 0; i < SUDOKU_SIZE; ++i) {
 			int nbMatchValues = 0;
 			bool partOfGrp = false;
-			QSet<int> values = sudoku->getPossibleValues(row, i);
+			QSet<int> values = sudoku->getCellPossibleValues(row, i);
 			foreach(int curValue, curSet) {
 				if (values.contains(curValue)) {
 					++nbMatchValues;
@@ -182,7 +189,7 @@ QSet<int> hiddenGroupValueFilter(Sudoku *sudoku, int row, int col)
 		for (int i = 0; i < SUDOKU_SIZE; ++i) {
 			int nbMatchValues = 0;
 			bool partOfGrp = false;
-			QSet<int> tmpPossibleValues = sudoku->getPossibleValues(i, col);
+			QSet<int> tmpPossibleValues = sudoku->getCellPossibleValues(i, col);
 			foreach(int curValue, curSet) {
 				if (tmpPossibleValues.contains(curValue)) {
 					++nbMatchValues;
@@ -214,7 +221,7 @@ QSet<int> hiddenGroupValueFilter(Sudoku *sudoku, int row, int col)
 			bool partOfGrp = false;
 			int squareRow = (row / 3) * 3 + i % 3;
 			int squareCol = (col / 3) * 3 + i / 3;
-			QSet<int> tmpPossibleValues = sudoku->getPossibleValues(squareRow, squareCol);
+			QSet<int> tmpPossibleValues = sudoku->getCellPossibleValues(squareRow, squareCol);
 			foreach(int curValue, curSet) {
 				if (tmpPossibleValues.contains(curValue)) {
 					++nbMatchValues;
@@ -245,32 +252,32 @@ QSet<int> hiddenGroupValueFilter(Sudoku *sudoku, int row, int col)
 	return possibleValues;
 }
 
-QSet<int> groupValueFilter(Sudoku *sudoku, int row, int col)
+QSet<int> solver::groupValueFilter(Sudoku *sudoku, int row, int col)
 {
-	int value = sudoku->getValue(row, col);
-	QSet<int> possibleValues = sudoku->getPossibleValues(row, col);
+	int value = sudoku->getCellValue(row, col);
+	QSet<int> possibleValues = sudoku->getCellPossibleValues(row, col);
 
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		int squareRow = (row / 3) * 3 + i % 3;
 		int squareCol = (col / 3) * 3 + i / 3;
 
-		QSet<int> sameRowCellPossibleValues = sudoku->getPossibleValues(row, i);
-		QSet<int> sameColCellPossibleValues = sudoku->getPossibleValues(i, col);
-		QSet<int> sameSquareCellPossibleValues = sudoku->getPossibleValues(squareRow, squareCol);
+		QSet<int> sameRowCellPossibleValues = sudoku->getCellPossibleValues(row, i);
+		QSet<int> sameColCellPossibleValues = sudoku->getCellPossibleValues(i, col);
+		QSet<int> sameSquareCellPossibleValues = sudoku->getCellPossibleValues(squareRow, squareCol);
 		int sameRowPossible = 0;
 		int sameColPossible = 0;
 		int sameSquarePossible = 0;
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			if (col != j && sudoku->getPossibleValues(row, j) == sameRowCellPossibleValues) {
+			if (col != j && sudoku->getCellPossibleValues(row, j) == sameRowCellPossibleValues) {
 				++sameRowPossible;
 			}
-			if (row != j && sudoku->getPossibleValues(j, col) == sameColCellPossibleValues) {
+			if (row != j && sudoku->getCellPossibleValues(j, col) == sameColCellPossibleValues) {
 				++sameColPossible;
 			}
 			int tmpSquareRow = (row / 3) * 3 + j % 3;
 			int tmpSquareCol = (col / 3) * 3 + j / 3;
 			if ((row != tmpSquareRow || col != tmpSquareCol)
-				&& sudoku->getPossibleValues(tmpSquareRow, tmpSquareCol) == sameSquareCellPossibleValues) {
+				&& sudoku->getCellPossibleValues(tmpSquareRow, tmpSquareCol) == sameSquareCellPossibleValues) {
 				++sameSquarePossible;
 			}
 		}
@@ -293,10 +300,10 @@ QSet<int> groupValueFilter(Sudoku *sudoku, int row, int col)
 	return possibleValues;
 }
 
-QSet<int> noChoiceFilter(Sudoku *sudoku, int row, int col)
+QSet<int> solver::noChoiceFilter(Sudoku *sudoku, int row, int col)
 {
-	int value = sudoku->getValue(row, col);
-	QSet<int> possibleValues = sudoku->getPossibleValues(row, col);
+	int value = sudoku->getCellValue(row, col);
+	QSet<int> possibleValues = sudoku->getCellPossibleValues(row, col);
 
 	QSet<int> tmpPossibleValue = possibleValues;
 	foreach(int possibleValue, tmpPossibleValue) {
@@ -304,17 +311,17 @@ QSet<int> noChoiceFilter(Sudoku *sudoku, int row, int col)
 		bool onlyPlaceOnCol = true;
 		bool onlyPlaceInSquare = true;
 		for (int i = 0; i < SUDOKU_SIZE; ++i) {
-			QSet<int> sameRowCellPossibleValues = sudoku->getPossibleValues(row, i);
+			QSet<int> sameRowCellPossibleValues = sudoku->getCellPossibleValues(row, i);
 			if (sameRowCellPossibleValues.contains(possibleValue) && i != col)
 				onlyPlaceOnRow = false;
 
-			QSet<int> sameColCellPossibleValues = sudoku->getPossibleValues(i, col);
+			QSet<int> sameColCellPossibleValues = sudoku->getCellPossibleValues(i, col);
 			if (sameColCellPossibleValues.contains(possibleValue) && i != row)
 				onlyPlaceOnCol = false;
 
 			int squareRow = (row / 3) * 3 + i % 3;
 			int squareCol = (col / 3) * 3 + i / 3;
-			QSet<int> sameSquareCellPossibleValues = sudoku->getPossibleValues(squareRow, squareCol);
+			QSet<int> sameSquareCellPossibleValues = sudoku->getCellPossibleValues(squareRow, squareCol);
 			if (sameSquareCellPossibleValues.contains(possibleValue)
 				&& (squareRow != row || squareCol != col))
 				onlyPlaceInSquare = false;
@@ -327,7 +334,7 @@ QSet<int> noChoiceFilter(Sudoku *sudoku, int row, int col)
 	return possibleValues;
 }
 
-void createCombinations(QSet<int> inList, QSet<int> toAdd, QList<QSet<int> > &outList)
+void solver::createCombinations(QSet<int> inList, QSet<int> toAdd, QList<QSet<int> > &outList)
 {
 	if (toAdd.empty()) {
 		return;

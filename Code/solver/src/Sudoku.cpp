@@ -8,6 +8,9 @@ Sudoku::Sudoku()
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
 			_values[i][j] = new SudokuCell(i, j);
+#ifdef _DEBUG
+			_solutionValues[i][j] = new SudokuCell(i, j);
+#endif
 		}
 	}
 }
@@ -16,19 +19,62 @@ Sudoku::~Sudoku() {
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
 			delete _values[i][j];
+#ifdef _DEBUG
+			delete _solutionValues[i][j];
+#endif
 		}
 	}
 }
 
-void Sudoku::setValue(int r, int c, int val)
+bool Sudoku::isFilled() const
+{
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			if (_values[i][j]->getValue() == 0) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool Sudoku::isValid() const
+{
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			if (!isCellValid(i, j)) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool Sudoku::isCellValid(int r, int c) const
+{
+	return _values[r][c]->isValid();
+}
+
+void Sudoku::setCellValue(int r, int c, int val)
 { 
 	_values[r][c]->setValue(val); 
 	updateValidity(); 
 }
 
-void Sudoku::setPossibleValues(int r, int c, QSet<int> possibleValues)
+void Sudoku::setCellInitialValue(int r, int c, int val)
 {
-	_values[r][c]->setPossibleValues(possibleValues);
+	_values[r][c]->setInitialValue(val);
+}
+
+void Sudoku::setCellPossibleValues(int r, int c, QSet<int> possibleValues)
+{
+	if (!isCellInitialValue(r, c))
+		_values[r][c]->setPossibleValues(possibleValues);
+	else {
+		QString mess = QString("Cell at (%1,%2) holds initial value - Unable to set possible value.").arg(QString::number(r), QString::number(c));
+		qWarning(mess.toStdString().c_str());
+	}
+	checkForFilterError();
 }
 
 int Sudoku::loadFromCsv(QString csvPath)
@@ -90,12 +136,33 @@ int Sudoku::loadFromCsv(QString csvPath)
 
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			setInitialValue(i, j, values[i][j]);
+			setCellInitialValue(i, j, values[i][j]);
 		}
 	}
 
 	updateValidity();
 
+#ifdef _DEBUG
+	QString solution = csvPath.left(csvPath.lastIndexOf('.')) + "_solution.csv";
+	QFile csvSolution(solution);
+	csvSolution.open(QFile::ReadOnly);
+	QTextStream solTextStream(&csvSolution);
+	rowIndex = 0;
+	while (solTextStream.readLineInto(&line)) {
+		if (line.isEmpty()) {
+			continue;
+		}
+
+		bool ok = true;
+		QStringList splitted = line.split(";");
+		for (int colIndex = 0; colIndex < splitted.size(); ++colIndex) {
+			int val = splitted[colIndex].toInt(&ok);
+			_solutionValues[rowIndex][colIndex]->setInitialValue(val);
+		}
+		rowIndex++;
+	}
+	csvSolution.close();
+#endif
 	return 0;
 }
 
@@ -113,7 +180,7 @@ void Sudoku::updateValidity()
 	for (int i_cell = 0; i_cell < SUDOKU_SIZE * SUDOKU_SIZE; ++i_cell) {
 		int row = i_cell / SUDOKU_SIZE;
 		int col = i_cell % SUDOKU_SIZE;
-		int value = getValue(row, col);
+		int value = getCellValue(row, col);
 
 		bool valid = true;
 		if (value == 0) {
@@ -121,41 +188,71 @@ void Sudoku::updateValidity()
 		}
 
 		for (int i = 0; i < SUDOKU_SIZE; ++i) {
-			bool alreadyOnRow = getValue(row, i) == value && i != col;
-			bool alreadyOnCol = getValue(i, col) == value && i != row;
+			bool alreadyOnRow = getCellValue(row, i) == value && i != col;
+			bool alreadyOnCol = getCellValue(i, col) == value && i != row;
 
 			int squareRow = (row / 3) * 3 + i % 3;
 			int squareCol = (col / 3) * 3 + i / 3;
-			bool alreadyOnSquare = (getValue(squareRow, squareCol) == value) && !(squareRow == row && squareCol == col);
+			bool alreadyOnSquare = (getCellValue(squareRow, squareCol) == value) && !(squareRow == row && squareCol == col);
 			if (alreadyOnRow || alreadyOnCol || alreadyOnSquare) {
 				valid = false; 
 				break;
 			}
 		}
-		setValid(row, col, valid);
+		setCellValid(row, col, valid);
 	}
 }
 
-bool Sudoku::isFilled()
+
+
+QString Sudoku::toString() const
 {
-	for (int i = 0; i < SUDOKU_SIZE; ++i) {
-		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			if (_values[i][j]->getValue() == 0) {
-				return false;
-			}
+	QString str;
+	for (int i = 0; i < SUDOKU_SIZE; i++) {
+		QStringList l;
+		for (int j = 0; j < SUDOKU_SIZE; j++) {
+			l.append(QString::number(getCellValue(i, j)));
 		}
+		str.append(l.join(";"));
+		str.append("\n");
 	}
-	return true;
+	return str.left(str.size() - 1);
 }
 
-bool Sudoku::isValid()
+void Sudoku::print() const
+{
+	QString topSep = "|-----------------|"; // ┌┬┐ ╔╦╗
+	QString sep = "|-+-+-+-+-+-+-+-+-|";	// ├┼┤ ╠╬╣ 
+	QString botSep = "|-----------------|"; // └┴┘ ╚╩╝
+
+	QString str = toString(); // | ║
+	str.replace(';', '|');
+	str.replace('\n', "|\n" + sep + "\n|");
+	str = '|' + str + '|';
+
+	std::cout << topSep.toStdString() << std::endl;
+	std::cout << str.toStdString() << std::endl;
+	std::cout << botSep.toStdString() << std::endl;
+}
+
+#ifdef _DEBUG
+void Sudoku::checkForFilterError()
 {
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			if (!_values[i][j]->isValid()) {
-				return false;
+			bool solutionPresent = false;
+			int sol = _solutionValues[i][j]->getValue();
+			foreach(int val, getCellPossibleValues(i, j)) {
+				solutionPresent |= sol == val;
+			}
+			if (!solutionPresent) {
+				
+				QString mess = QString("Correct value %1  disappeared from possible value of cell (%2;%3) !")
+								.arg(QString::number(sol), QString::number(i), QString::number(j));
+				qWarning(mess.toStdString().c_str());
 			}
 		}
 	}
-	return true;
 }
+#endif
+

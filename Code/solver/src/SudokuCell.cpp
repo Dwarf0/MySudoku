@@ -11,8 +11,6 @@ void SudokuCell::setValue(int value)
 		_value = value;
 		if (_value == 0) {
 			_possibleValues = { 1, 2, 3, 4 ,5 , 6, 7, 8, 9 };
-		} else {
-			_possibleValues.clear();
 		}
 	}
 }
@@ -20,8 +18,10 @@ void SudokuCell::setValue(int value)
 void SudokuCell::setInitialValue(int value)
 {
 	_value = value;
-	if(_value)
+	if (_value) {
 		_isInitialValue = true;
+		_possibleValues = { _value };
+	}
 }
 
 void SudokuCell::reset()

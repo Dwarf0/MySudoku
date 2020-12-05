@@ -17,26 +17,38 @@ public:
 
 	~Sudoku();
 
+	// getters
+	bool isFilled() const;
+	bool isValid() const;
+
+	int getCellValue(int r, int c) const { return _values[r][c]->getValue(); }
+	QSet<int> getCellPossibleValues(int r, int c) const { return _values[r][c]->getPossibleValues(); }
+	bool isCellValid(int r, int c) const;
+	bool isCellInitialValue(int r, int c) const { return _values[r][c]->isInitialValue(); }
+
+	//setters
 	void reset();
+	// TODO : faire un "setValue(QVector<QVector<int> >)" ?
 
-	int getValue(int r, int c) { return _values[r][c]->getValue(); }
-	QSet<int> getPossibleValues(int r, int c) { return _values[r][c]->getPossibleValues(); }
-
-	bool isFilled();
-	bool isValid();
-	bool isInitialValue(int r, int c) { return _values[r][c]->isInitialValue(); }
-
-	void setValue(int r, int c, int val);
-	void setValid(int r, int c, bool valid) { _values[r][c]->setValid(valid); }
-	void setInitialValue(int r, int c, int val) { _values[r][c]->setInitialValue(val); }
-	void setPossibleValues(int r, int c, QSet<int> possibleValues);
+	void setCellValue(int r, int c, int val);
+	void setCellValid(int r, int c, bool valid) { _values[r][c]->setValid(valid); }
+	void setCellInitialValue(int r, int c, int val);
+	void setCellPossibleValues(int r, int c, QSet<int> possibleValues);
 	
 	int loadFromCsv(QString filepath);
 	void updateValidity();
 
-private:
+	//
+	QString toString() const;
+	void print() const;
 
+private:
 	SudokuCell *_values[SUDOKU_SIZE][SUDOKU_SIZE];
+
+#ifdef _DEBUG
+	SudokuCell *_solutionValues[SUDOKU_SIZE][SUDOKU_SIZE];
+	void checkForFilterError();
+#endif
 };
 
 

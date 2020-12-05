@@ -48,9 +48,6 @@ public slots:
 
 private:
 	void resetModelValues();
-	void connectCell(int row, int col);
-	void disableCellsSignals();
-	void enableCellsSignals();
 
 	bool _autocheckMode;
 	bool _displayHelp;
