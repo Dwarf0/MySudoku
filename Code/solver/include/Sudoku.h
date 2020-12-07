@@ -10,7 +10,7 @@
 #include <SudokuCell.h>
 
 
-class Sudoku
+class DLL_EXPORT Sudoku
 {
 public:
 	Sudoku();

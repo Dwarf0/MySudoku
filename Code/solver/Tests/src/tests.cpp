@@ -39,6 +39,6 @@ TEST(load_csv_testcase, load_csv_invalid)
 TEST(create_combination_testcase, with_4_elts)
 {
 	QList<QSet<int> > output;
-	createCombinations(QSet<int>(), QSet<int>({ 1, 2, 3, 4 }), output);
+	solver::createCombinations(QSet<int>(), QSet<int>({ 1, 2, 3, 4 }), output);
 	EXPECT_EQ(output.size(), 15);
 }

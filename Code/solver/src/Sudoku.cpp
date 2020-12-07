@@ -74,7 +74,9 @@ void Sudoku::setCellPossibleValues(int r, int c, QSet<int> possibleValues)
 		QString mess = QString("Cell at (%1,%2) holds initial value - Unable to set possible value.").arg(QString::number(r), QString::number(c));
 		qWarning(mess.toStdString().c_str());
 	}
+#ifdef _DEBUG
 	checkForFilterError();
+#endif
 }
 
 int Sudoku::loadFromCsv(QString csvPath)

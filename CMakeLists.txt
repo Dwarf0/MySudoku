@@ -1,7 +1,7 @@
 cmake_minimum_required( VERSION 3.1.0 ) 
 
-set(PROJECT_NAME MySudokuProject)
-project(${PROJECT_NAME})
+set(MAIN_PROJECT_NAME MySudoku)
+project(${MAIN_PROJECT_NAME})
 set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")

@@ -11,7 +11,6 @@ class SudokuModel;
 
 class SudokuCell : public QObject
 {
-	Q_OBJECT
 public:
 	SudokuCell(int row = -1, int col = -1) :
 		_row(row), _col(col), _value(0), _isInitialValue(false), _isValid(true), _possibleValues({ 1, 2, 3, 4 ,5 ,6 , 7, 8, 9 })
