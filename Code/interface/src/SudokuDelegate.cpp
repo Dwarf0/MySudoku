@@ -1,7 +1,6 @@
 ﻿#include "SudokuDelegate.h"
 
 #include <QPainter>
-#include <QLineEdit>
 
 SudokuDelegate::SudokuDelegate(QWidget *parent)
 {
@@ -24,12 +23,13 @@ void SudokuDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option
 }
 
 QWidget * SudokuDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
-{
-	return new QLineEdit(parent);
+{ 
+	return new SingleValueLineEdit(parent);
 }
 
-void SudokuDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const {
-	QLineEdit *lineEdit = dynamic_cast<QLineEdit *>(editor);
+void SudokuDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const 
+{
+	SingleValueLineEdit *lineEdit = dynamic_cast<SingleValueLineEdit *>(editor);
 	if (lineEdit) {
 		QString val = index.data(SudokuModel::CellValueRole).toString();
 		lineEdit->setText(val);
@@ -38,7 +38,7 @@ void SudokuDelegate::setEditorData(QWidget *editor, const QModelIndex &index) co
 
 void SudokuDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
-	QLineEdit *lineEdit = dynamic_cast<QLineEdit *>(editor);
+	SingleValueLineEdit *lineEdit = dynamic_cast<SingleValueLineEdit *>(editor);
 	if (lineEdit) {
 		QString val = lineEdit->text();
 		model->setData(index, val);
