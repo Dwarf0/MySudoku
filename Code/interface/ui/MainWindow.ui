@@ -73,8 +73,9 @@
    </property>
    <widget class="QMenu" name="menuLoader">
     <property name="title">
-     <string>Load Sudoku</string>
+     <string>Initialize Sudoku</string>
     </property>
+    <addaction name="actionInitManually"/>
     <addaction name="actionLoadFromCsv"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
@@ -92,7 +93,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>from csv</string>
+    <string>Load from csv</string>
    </property>
   </action>
   <action name="actionAutocheck">
@@ -109,6 +110,11 @@
    </property>
    <property name="text">
     <string>Display help</string>
+   </property>
+  </action>
+  <action name="actionInitManually">
+   <property name="text">
+    <string>Init. manually</string>
    </property>
   </action>
  </widget>

@@ -14,8 +14,9 @@ class DLL_EXPORT Sudoku
 {
 public:
 	Sudoku();
-
 	~Sudoku();
+
+	Sudoku& operator=(const Sudoku& other);
 
 	// getters
 	bool isFilled() const;
@@ -34,6 +35,7 @@ public:
 	void setCellValid(int r, int c, bool valid) { _values[r][c]->setValid(valid); }
 	void setCellInitialValue(int r, int c, int val);
 	void setCellPossibleValues(int r, int c, QSet<int> possibleValues);
+	void setInitMode(bool initMode) { _initMode = initMode; }
 	
 	int loadFromCsv(QString filepath);
 	void updateValidity();
@@ -43,6 +45,7 @@ public:
 	void print() const;
 
 private:
+	bool _initMode;
 	SudokuCell *_values[SUDOKU_SIZE][SUDOKU_SIZE];
 
 #ifdef _DEBUG

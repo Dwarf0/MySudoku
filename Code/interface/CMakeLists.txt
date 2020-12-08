@@ -27,6 +27,7 @@ set(HEADER_FILES
 PREPEND(HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${HEADER_FILES})
 
 set(FORMS_FILES
+    ui/InitDialog.ui
     ui/MainWindow.ui
 )
 PREPEND(FORMS_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${FORMS_FILES})
@@ -58,6 +59,7 @@ target_link_libraries(${PROJECT_NAME}
     ${SUDOKU_SOLVER_LIB} 
     Qt5::Widgets
 )
+add_dependencies(${PROJECT_NAME} SudokuSolver)
 
 install(TARGETS ${PROJECT_NAME}
     DESTINATION ${PROJECT_NAME}/$<CONFIG>/

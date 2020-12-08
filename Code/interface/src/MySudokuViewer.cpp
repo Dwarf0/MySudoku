@@ -4,25 +4,24 @@
 #include <QFileDialog>
 #include <QSignalMapper>
 #include <QtGlobal>
+#include <QWindow>
+#include <QDialogButtonBox>
 
 MySudokuViewer::MySudokuViewer(QWidget *parent) {
 	_mainWindowUi.setupUi(this);
 
-	_sudokuModel = new SudokuModel(this);
-	_sudokuDelegate = new SudokuDelegate(this);
-
 	_sudokuView = _mainWindowUi.tableView;
+	_sudokuModel = new SudokuModel(_sudokuView);
+	_sudokuDelegate = new SudokuDelegate(_sudokuView);
 	_sudokuView->setModel(_sudokuModel);
 	_sudokuView->setItemDelegate(_sudokuDelegate);
-	_sudokuView->horizontalHeader()->hide();
-	_sudokuView->verticalHeader()->hide();
-	_sudokuView->horizontalHeader()->setDefaultSectionSize(60);
-	_sudokuView->verticalHeader()->setDefaultSectionSize(60);
 	
 	connect(_mainWindowUi.actionLoadFromCsv, &QAction::triggered, this, &MySudokuViewer::loadFromCsv);
+	connect(_mainWindowUi.actionInitManually, &QAction::triggered, this, &MySudokuViewer::initManually);
 	connect(_mainWindowUi.actionAutocheck, &QAction::triggered, _sudokuModel, &SudokuModel::setAutocheckMode);
 	connect(_mainWindowUi.actionDisplayHelp, &QAction::triggered, _sudokuModel, &SudokuModel::displayHelp);
 
+	
 	QSignalMapper* signalMapper = new QSignalMapper(this);
 	connect(_mainWindowUi.directFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
 	connect(_mainWindowUi.indirectFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
@@ -51,4 +50,22 @@ void MySudokuViewer::loadFromCsv()
 	if (csvPath != QString::null) {
 		_sudokuModel->loadFromCsv(csvPath);
 	}
+}
+
+void MySudokuViewer::initManually()
+{
+	QDialog *initWindow = new QDialog(this);
+	_initDialogUi.setupUi(initWindow);
+
+	SudokuModel *model = new SudokuModel(_initDialogUi.tableView);
+	SudokuDelegate *delegate = new SudokuDelegate(_initDialogUi.tableView);
+	_initDialogUi.tableView->setModel(model);
+	_initDialogUi.tableView->setItemDelegate(delegate);
+	model->setInitMode(true);
+	if (initWindow->exec() == QDialog::Accepted) {
+		const Sudoku * s = model->getSudoku();
+		_sudokuModel->initFromSudoku(s);
+	}
+	model->setInitMode(false);
+	delete initWindow;
 }

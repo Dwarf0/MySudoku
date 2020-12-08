@@ -19,20 +19,20 @@ public:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override { return SUDOKU_SIZE; }
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override { return SUDOKU_SIZE; }
 	QVariant data(const QModelIndex &index, int role) const override;
-	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
 	Qt::ItemFlags flags(const QModelIndex &index) const;
-
-	int loadFromCsv(QString csvPath);
-	void updateCell(int value, int row, int col); 
-	void updateCellsPossibleValues();
 	QList<int> getPossibleValues(int r, int c);
+	const Sudoku * getSudoku() { return _sudoku; }
+	
+	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+	void setInitMode(bool initMode) { _sudoku->setInitMode(initMode); }
+	
+	int loadFromCsv(QString csvPath); 
+	void initFromSudoku(const Sudoku *sudoku);
+	void updateCellsPossibleValues();
 
 	bool isValid();
 	bool isFilled();
-
-	QString toString() const;
-	void print() const;
-
+	
 	enum AdditionalRoles {
 		IsValidRole = Qt::UserRole+1,
 		IsInitialValueRole,

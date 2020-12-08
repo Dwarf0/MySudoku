@@ -5,6 +5,7 @@
 
 Sudoku::Sudoku()
 {
+	_initMode = false;
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
 			_values[i][j] = new SudokuCell(i, j);
@@ -24,6 +25,22 @@ Sudoku::~Sudoku() {
 #endif
 		}
 	}
+}
+
+
+Sudoku& Sudoku::operator=(const Sudoku& other)
+{
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			if (other.isCellInitialValue(i, j)) {
+				_values[i][j]->setInitialValue(other.getCellValue(i, j));
+			} else {
+				_values[i][j]->setPossibleValues(other.getCellPossibleValues(i, j));
+				_values[i][j]->setValue(other.getCellValue(i, j));
+			}
+		}
+	}
+	return *this;
 }
 
 bool Sudoku::isFilled() const
@@ -57,7 +74,12 @@ bool Sudoku::isCellValid(int r, int c) const
 
 void Sudoku::setCellValue(int r, int c, int val)
 { 
-	_values[r][c]->setValue(val); 
+	if (_initMode) {
+		_values[r][c]->setInitialValue(val);
+	}
+	else {
+		_values[r][c]->setValue(val);
+	}
 	updateValidity(); 
 }
 

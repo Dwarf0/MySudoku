@@ -27,7 +27,6 @@ QList<int> SudokuModel::getPossibleValues(int r, int c)
 void SudokuModel::displayHelp(bool displayHelp) 
 { 
 	_displayHelp = displayHelp; 
-	// if(_displayHelp) updateCellsPossibleValues(); 
 }
 
 void SudokuModel::applyFilter(int filterType)
@@ -45,12 +44,6 @@ void SudokuModel::resetModelValues()
 void SudokuModel::updateCellsPossibleValues()
 {
 	solver::updatePossibleValues(_sudoku);
-
-	//for (int i = 0; i < SUDOKU_SIZE; ++i) {
-	//	for (int j = 0; j < SUDOKU_SIZE; ++j) {
-	//		_sudoku->updatePossibleValues(); [i][j]->updatePossibleValues();
-	//	}
-	//}
 }
 
 QVariant SudokuModel::data(const QModelIndex &index, int role) const
@@ -126,6 +119,11 @@ Qt::ItemFlags SudokuModel::flags(const QModelIndex &index) const
 int SudokuModel::loadFromCsv(QString csvPath)
 {
 	return _sudoku->loadFromCsv(csvPath);
+}
+
+void SudokuModel::initFromSudoku(const Sudoku * sudoku)
+{
+	*_sudoku = *sudoku;
 }
 
 bool SudokuModel::isValid()

@@ -5,6 +5,7 @@
 #include <QMainWindow>
 #include <iostream>
 
+#include "ui_InitDialog.h"
 #include "ui_MainWindow.h"
 
 #include "SudokuModel.h"
@@ -20,9 +21,11 @@ public:
 
 private slots:
 	void loadFromCsv();
+	void initManually();
 
 private:
 	Ui::MainWindow _mainWindowUi;
+	Ui::InitDialog _initDialogUi;
 	SudokuModel *_sudokuModel;
 	SudokuView *_sudokuView;
 	SudokuDelegate *_sudokuDelegate;

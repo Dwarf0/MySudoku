@@ -7,4 +7,4 @@ I am developping this project on Windows with Visual Studio and using :
 - Qt5 as a framework for my UI,
 - GTest for testing the solver
 
-I also plan to add Doxygen for documentation.
+I also plan to add Doxygen for documentation and use QTranslator for localization of the few words (for the sake of it).
