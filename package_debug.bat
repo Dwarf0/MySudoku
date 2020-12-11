@@ -1,6 +1,8 @@
 
-set SUDOKU_BIN_DIR="C:\SandBox\Binaries\MySudoku\Debug"
+call winEnv.bat
 
-"C:\Program Files (x86)\NSIS\makensis.exe" /DINPUT_DIR=%SUDOKU_BIN_DIR% /DDEBUG package.nsi 
+REM Ajouter un appel au build/compilation/install avant la création du setup
+
+%MAKENSIS_EXE% /DINPUT_DIR=%SUDOKU_BIN_DIR%\Debug /DDEBUG %PROJECT_NAME%.nsi 
 
 pause
