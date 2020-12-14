@@ -78,14 +78,10 @@ void Sudoku::setCellValue(int r, int c, int val)
 		_values[r][c]->setInitialValue(val);
 	}
 	else {
+		/// TODO : faire un chek de isInitialValue avant et mettre un warning si on tente de modifier une valeur initiale ?
 		_values[r][c]->setValue(val);
 	}
 	updateValidity(); 
-}
-
-void Sudoku::setCellInitialValue(int r, int c, int val)
-{
-	_values[r][c]->setInitialValue(val);
 }
 
 void Sudoku::setCellPossibleValues(int r, int c, QSet<int> possibleValues)
@@ -93,7 +89,8 @@ void Sudoku::setCellPossibleValues(int r, int c, QSet<int> possibleValues)
 	if (!isCellInitialValue(r, c))
 		_values[r][c]->setPossibleValues(possibleValues);
 	else {
-		QString mess = QString("Cell at (%1,%2) holds initial value - Unable to set possible value.").arg(QString::number(r), QString::number(c));
+		QString mess = QString("Cell at (%1,%2) holds initial value - Unable to set possible value.")
+						.arg(QString::number(r), QString::number(c));
 		qWarning(mess.toStdString().c_str());
 	}
 #ifdef _DEBUG
@@ -158,11 +155,13 @@ int Sudoku::loadFromCsv(QString csvPath)
 	// here, csv is valid and its values are loaded in the variable "values"
 	reset();
 
+	enableInitMode();
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			setCellInitialValue(i, j, values[i][j]);
+			setCellValue(i, j, values[i][j]);
 		}
 	}
+	disableInitMode();
 
 	updateValidity();
 
@@ -199,6 +198,21 @@ void Sudoku::reset()
 	}
 }
 
+void Sudoku::clean()
+{
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			if (!_values[i][j]->isInitialValue())
+				_values[i][j]->setValue(0);
+		}
+	}
+}
+
+void Sudoku::setCellInitialValue(int r, int c, int val)
+{ 
+	_values[r][c]->setInitialValue(val); 
+}
+
 void Sudoku::updateValidity()
 {
 	for (int i_cell = 0; i_cell < SUDOKU_SIZE * SUDOKU_SIZE; ++i_cell) {
@@ -226,8 +240,6 @@ void Sudoku::updateValidity()
 		setCellValid(row, col, valid);
 	}
 }
-
-
 
 QString Sudoku::toString() const
 {
@@ -266,6 +278,10 @@ void Sudoku::checkForFilterError()
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
 			bool solutionPresent = false;
 			int sol = _solutionValues[i][j]->getValue();
+			if (sol) {
+				// case where solution's value couldn't be loaded
+				continue;
+			}
 			foreach(int val, getCellPossibleValues(i, j)) {
 				solutionPresent |= sol == val;
 			}

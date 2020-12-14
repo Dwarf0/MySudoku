@@ -1,5 +1,23 @@
 ﻿#include "solver.h"
 
+/// TODO : Faire une fonction solve dont l'algo pourrait ressembler à :
+//func solve{
+//	while (changed) {
+//		pour chaque filtre F,
+//			changed |= updatePossibleValues avec filtre F
+//	}
+//	si le sudoku est résolu,
+//		fin de la func
+//	sinon, on récupère la cell avec le moins de possibleValues
+//	pour chaque valeur V possible de la cell
+//		on clone le sudoku actuel
+//		on set la valeur de la cell du clone avec V
+//		on rappelle solve sur le clone
+//		si le sudoku est résolu,
+//			on affecte les valeurs du clone au sudoku initial
+//			fin de la func
+//		sinon, la valeur utilisé précédemment n était pas la bonne
+//}
 
 bool solver::updatePossibleValues(Sudoku *sudoku, int filterType/*=0*/)
 {
@@ -19,7 +37,6 @@ bool solver::updatePossibleValues(Sudoku *sudoku, int filterType/*=0*/)
 bool solver::applyFilterOnCell(Sudoku *sudoku, int filterType, int row, int col)
 {
 	bool changed = false;
-
 	// TODO : si à l'issue d'un filtre, on ne se retrouve avec qu'une seule valeur possible, 
 	//        alors les autres filtres ne devraient pas être lancés
 
@@ -53,7 +70,8 @@ bool solver::applyFilterOnCell(Sudoku *sudoku, int filterType, int row, int col)
 	return changed;
 }
 
-QSet<int> solver::directValueFilter(Sudoku *sudoku, int row, int col)
+/// TODO : devrait aussi considérer les Cell vides mais qui n'ont qu'une seule valeur possible
+QSet<int> solver::directValueFilter(const Sudoku *sudoku, int row, int col)
 {
 	int value = sudoku->getCellValue(row, col);
 	QSet<int> possibleValues = sudoku->getCellPossibleValues(row, col);
@@ -73,7 +91,7 @@ QSet<int> solver::directValueFilter(Sudoku *sudoku, int row, int col)
 	return possibleValues;
 }
 
-QSet<int> solver::indirectValueFilter(Sudoku *sudoku, int row, int col)
+QSet<int> solver::indirectValueFilter(const Sudoku *sudoku, int row, int col)
 {
 	int value = sudoku->getCellValue(row, col);
 	QSet<int> possibleValues = sudoku->getCellPossibleValues(row, col);
@@ -145,7 +163,7 @@ QSet<int> solver::indirectValueFilter(Sudoku *sudoku, int row, int col)
 	return possibleValues;
 }
 
-QSet<int> solver::hiddenGroupValueFilter(Sudoku *sudoku, int row, int col)
+QSet<int> solver::hiddenGroupValueFilter(const Sudoku *sudoku, int row, int col)
 {
 	int value = sudoku->getCellValue(row, col);
 	QSet<int> possibleValues = sudoku->getCellPossibleValues(row, col);
@@ -156,6 +174,8 @@ QSet<int> solver::hiddenGroupValueFilter(Sudoku *sudoku, int row, int col)
 	foreach(QSet<int> curSet, allSets) {
 		int nbCellsWithGrp = 0;
 		int nbCellsWithPartOfGrp = 0;
+
+		// row
 		for (int i = 0; i < SUDOKU_SIZE; ++i) {
 			int nbMatchValues = 0;
 			bool partOfGrp = false;
@@ -186,6 +206,7 @@ QSet<int> solver::hiddenGroupValueFilter(Sudoku *sudoku, int row, int col)
 			break;
 		}
 
+		// col
 		for (int i = 0; i < SUDOKU_SIZE; ++i) {
 			int nbMatchValues = 0;
 			bool partOfGrp = false;
@@ -216,6 +237,7 @@ QSet<int> solver::hiddenGroupValueFilter(Sudoku *sudoku, int row, int col)
 			break;
 		}
 
+		// square
 		for (int i = 0; i < SUDOKU_SIZE; ++i) {
 			int nbMatchValues = 0;
 			bool partOfGrp = false;
@@ -252,7 +274,7 @@ QSet<int> solver::hiddenGroupValueFilter(Sudoku *sudoku, int row, int col)
 	return possibleValues;
 }
 
-QSet<int> solver::groupValueFilter(Sudoku *sudoku, int row, int col)
+QSet<int> solver::groupValueFilter(const Sudoku *sudoku, int row, int col)
 {
 	int value = sudoku->getCellValue(row, col);
 	QSet<int> possibleValues = sudoku->getCellPossibleValues(row, col);
@@ -300,7 +322,7 @@ QSet<int> solver::groupValueFilter(Sudoku *sudoku, int row, int col)
 	return possibleValues;
 }
 
-QSet<int> solver::noChoiceFilter(Sudoku *sudoku, int row, int col)
+QSet<int> solver::noChoiceFilter(const Sudoku *sudoku, int row, int col)
 {
 	int value = sudoku->getCellValue(row, col);
 	QSet<int> possibleValues = sudoku->getCellPossibleValues(row, col);

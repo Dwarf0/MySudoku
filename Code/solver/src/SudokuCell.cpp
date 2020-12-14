@@ -7,6 +7,11 @@
 
 void SudokuCell::setValue(int value)
 {
+	if (value < 0 || value > 9) {
+		QString mess = QString("Error: trying to set an invalid value (%1) for SudokuCell at (%2,%3).")
+								.arg(QString::number(value), QString::number(_row), QString::number(_col));
+		qWarning(mess.toStdString().c_str());
+	}
 	if (_value != value) {
 		_value = value;
 		if (_value == 0) {

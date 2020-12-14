@@ -61,11 +61,11 @@ void MySudokuViewer::initManually()
 	SudokuDelegate *delegate = new SudokuDelegate(_initDialogUi.tableView);
 	_initDialogUi.tableView->setModel(model);
 	_initDialogUi.tableView->setItemDelegate(delegate);
-	model->setInitMode(true);
+	model->enableInitMode();
 	if (initWindow->exec() == QDialog::Accepted) {
 		const Sudoku * s = model->getSudoku();
 		_sudokuModel->initFromSudoku(s);
 	}
-	model->setInitMode(false);
+	model->disableInitMode();
 	delete initWindow;
 }

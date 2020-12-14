@@ -24,7 +24,8 @@ public:
 	const Sudoku * getSudoku() { return _sudoku; }
 	
 	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
-	void setInitMode(bool initMode) { _sudoku->setInitMode(initMode); }
+	void enableInitMode() { _sudoku->enableInitMode(); }
+	void disableInitMode() { _sudoku->disableInitMode(); }
 	
 	int loadFromCsv(QString csvPath); 
 	void initFromSudoku(const Sudoku *sudoku);
