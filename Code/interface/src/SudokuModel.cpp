@@ -14,16 +14,6 @@ SudokuModel::SudokuModel(QWidget *parent) {
 SudokuModel::~SudokuModel() {
 }
 
-QList<int> SudokuModel::getPossibleValues(int r, int c)
-{
-	QList<int> values;
-	foreach(int v, _sudoku->getCellPossibleValues(r, c)) {
-		values.append(v);
-	}
-	qSort(values);
-	return values;
-}
-
 void SudokuModel::displayHelp(bool displayHelp) 
 { 
 	_displayHelp = displayHelp; 
