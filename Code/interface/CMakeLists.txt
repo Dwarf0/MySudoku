@@ -48,15 +48,9 @@ set(ALL_FILES
 )
 add_executable(${PROJECT_NAME} ${ALL_FILES} src/main.cpp)
 
-find_library(SUDOKU_SOLVER_DEBUG_LIB NAMES SudokuSolver PATHS "${CMAKE_INSTALL_PREFIX}/SudokuSolver/Debug")
-find_library(SUDOKU_SOLVER_RELEASE_LIB NAMES SudokuSolver PATHS "${CMAKE_INSTALL_PREFIX}/SudokuSolver/Release")
-SET(SUDOKU_SOLVER_LIB
-  debug ${SUDOKU_SOLVER_DEBUG_LIB}
-  optimized ${SUDOKU_SOLVER_RELEASE_LIB}
-)
-
 target_link_libraries(${PROJECT_NAME} 
-    ${SUDOKU_SOLVER_LIB} 
+    # ${SUDOKU_SOLVER_LIB} 
+    SudokuSolver
     Qt5::Widgets
 )
 add_dependencies(${PROJECT_NAME} SudokuSolver)

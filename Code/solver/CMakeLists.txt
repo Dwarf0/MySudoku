@@ -40,7 +40,10 @@ set(ALL_FILES
 
 add_library(${PROJECT_NAME} SHARED ${ALL_FILES})
 list(JOIN SUDOKU_SOLVER_PUBLIC_HEADER_FILES ";" PUBLIC_H)
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${PUBLIC_H}")
+set_target_properties(${PROJECT_NAME} PROPERTIES 
+    PUBLIC_HEADER "${PUBLIC_H}"
+    DEBUG_POSTFIX "d"
+)
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
 
 install(TARGETS ${PROJECT_NAME}
