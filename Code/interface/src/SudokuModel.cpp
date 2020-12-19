@@ -72,8 +72,14 @@ QVariant SudokuModel::data(const QModelIndex &index, int role) const
 	} else if (role == SudokuModel::CellValueRole) {
 		return value;
 	} else if (role == SudokuModel::PossibleValuesRole) {
-		QStringList strList;
+		QList<int> intList;
 		foreach(int v, possibleValues) {
+			intList.append(v);
+		}
+		qSort<QList<int> >(intList);
+		//qsort(intList);
+		QStringList strList;
+		foreach(int v, intList) {
 			strList.append(QString::number(v));
 		}
 		return strList.join(" ");
