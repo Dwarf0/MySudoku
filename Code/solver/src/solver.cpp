@@ -84,7 +84,7 @@ QSet<int> solver::directValueFilter(const Sudoku *sudoku, int row, int col)
 
 		int squareRow = (row / 3) * 3 + i % 3;
 		int squareCol = (col / 3) * 3 + i / 3;
-		if(i!= row && i != col)
+		if(i!= row || i != col)
 			possibleValues.remove(sudoku->getCellValue(squareRow, squareCol));
 	}
 

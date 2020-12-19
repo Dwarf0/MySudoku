@@ -278,7 +278,7 @@ void Sudoku::checkForFilterError()
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
 			bool solutionPresent = false;
 			int sol = _solutionValues[i][j]->getValue();
-			if (sol) {
+			if (! sol) {
 				// case where solution's value couldn't be loaded
 				continue;
 			}
