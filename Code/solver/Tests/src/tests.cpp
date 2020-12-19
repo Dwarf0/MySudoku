@@ -82,7 +82,7 @@ TEST(filter_testcase, indirect_filter)
 
 TEST(filter_testcase, group_filter)
 {
-	// cells (8, 0) and (8, 1) both holds {2, 5} as possible values and form a group
+	// After the Direct filter, cells (8, 0) and (8, 1) both holds {2, 5} as possible values and form a group
 	Sudoku sudoku;
 	QString path(TESTS_PATH);
 	int cellRow = 7;
@@ -106,9 +106,17 @@ TEST(filter_testcase, group_filter)
 	EXPECT_EQ(group, sudoku.getCellPossibleValues(cellRow, cellCol));
 }
 
+TEST(filter_testcase, create_combination_testcase)
+{
+	QList<QSet<int> > output;
+	solver::createCombinations(QSet<int>(), QSet<int>({ 1, 2, 3, 4 }), output);
+	EXPECT_EQ(output.size(), 15);
+}
+
 TEST(filter_testcase, hidden_group_filter)
 {
-	// cells (0, 2) and (0, 3) are the only cells int the row that can hold {1, } as possible values and form a group
+	// After the Direct filter, cells (0, 2) and (0, 3) are the only cells int the row that can hold {1, 6} 
+	// as possible values and form a group
 	Sudoku sudoku;
 	QString path(TESTS_PATH);
 	int cellRow1 = 0;
@@ -138,9 +146,29 @@ TEST(filter_testcase, hidden_group_filter)
 	EXPECT_EQ(hiddenGroup, sudoku.getCellPossibleValues(cellRow2, cellCol2));
 }
 
-TEST(create_combination_testcase, with_4_elts)
+TEST(filter_testcase, nochoice_filter)
 {
-	QList<QSet<int> > output;
-	solver::createCombinations(QSet<int>(), QSet<int>({ 1, 2, 3, 4 }), output);
-	EXPECT_EQ(output.size(), 15);
+	// After the Direct filter, cell (0, 2) is the only one that can holds 1 in its column
+	Sudoku sudoku;
+	QString path(TESTS_PATH);
+	int cellRow = 0;
+	int cellCol = 2;
+
+	int err = sudoku.loadFromCsv(path + "/data/easy.csv");
+	EXPECT_EQ(err, 0);
+	EXPECT_EQ(sudoku.isValid(), true);
+
+	QSet<int> all = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	EXPECT_EQ(all, sudoku.getCellPossibleValues(cellRow, cellCol));
+
+	solver::updatePossibleValues(&sudoku, solver::Direct);
+
+	QSet<int> direct = { 1, 6, 9 };
+	EXPECT_EQ(direct, sudoku.getCellPossibleValues(cellRow, cellCol));
+
+	solver::updatePossibleValues(&sudoku, solver::NoChoice);
+
+	QSet<int> indirect = { 1 };
+	EXPECT_EQ(indirect, sudoku.getCellPossibleValues(cellRow, cellCol));
 }
+
