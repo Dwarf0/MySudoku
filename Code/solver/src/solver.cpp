@@ -21,53 +21,53 @@
 
 bool solver::updatePossibleValues(Sudoku *sudoku, int filterType/*=0*/)
 {
+	// NB : We copy the given sudoku so we can update the sudoku's cells' possible values while still 
+	// using the original possible values for the filters.
+	// This is suboptimal for solving the Sudoku itself, but it's better user-wise as we won't skip/hide steps for the user
+
 	bool changed = false;
+	Sudoku clone;
+	clone = *sudoku;
 
 	// TODO : ajouter un "while( !converged ){ ... }" avec converged qui récupère le retour de applyFilter ?
-	//		  sachant que chercher une convergence a pas toujours de sens selon le filtre (surtout pour filtre direct)
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			changed |= applyFilterOnCell(sudoku, filterType, i, j);
+			QSet<int> curPossibleValues = clone.getCellPossibleValues(i, j);
+			if (curPossibleValues.size() > 1) {
+				QSet<int> newValues = applyFiltersOnCell(&clone, filterType, i, j);
+				if (curPossibleValues != newValues) {
+					changed |= true;
+					sudoku->setCellPossibleValues(i, j, newValues);
+				}
+			}
 		}
 	}
 
 	return changed;
 }
 
-bool solver::applyFilterOnCell(Sudoku *sudoku, int filterType, int row, int col)
+QSet<int> solver::applyFiltersOnCell(Sudoku *sudoku, int filterType, int row, int col)
 {
 	bool changed = false;
-	// TODO : si à l'issue d'un filtre, on ne se retrouve avec qu'une seule valeur possible, 
-	//        alors les autres filtres ne devraient pas être lancés
+	QSet<int> possibleValues = sudoku->getCellPossibleValues(row, col);
 
-	QSet<int> possibleValues;
-	if (possibleValues.size() != 1 && filterType & Direct) {
-		possibleValues = directValueFilter(sudoku, row, col);
-		changed = possibleValues != sudoku->getCellPossibleValues(row, col);
-		sudoku->setCellPossibleValues(row, col, possibleValues);
+	if (filterType & Direct) {
+		possibleValues.intersect(directValueFilter(sudoku, row, col));
 	}
-	if (possibleValues.size() != 1 && filterType & Indirect) {
-		possibleValues = indirectValueFilter(sudoku, row, col);
-		changed = possibleValues != sudoku->getCellPossibleValues(row, col);
-		sudoku->setCellPossibleValues(row, col, possibleValues);
+	if (filterType & Indirect) {
+		possibleValues.intersect(indirectValueFilter(sudoku, row, col));
 	}
-	if (possibleValues.size() != 1 && filterType & Group) {
-		possibleValues = groupValueFilter(sudoku, row, col);
-		changed = possibleValues != sudoku->getCellPossibleValues(row, col);
-		sudoku->setCellPossibleValues(row, col, possibleValues);
+	if (filterType & Group) {
+		possibleValues.intersect(groupValueFilter(sudoku, row, col));
 	}
-	if (possibleValues.size() != 1 && filterType & HiddenGroup) {
-		possibleValues = hiddenGroupValueFilter(sudoku, row, col);
-		changed = possibleValues != sudoku->getCellPossibleValues(row, col);
-		sudoku->setCellPossibleValues(row, col, possibleValues);
+	if (filterType & HiddenGroup) {
+		possibleValues.intersect(hiddenGroupValueFilter(sudoku, row, col));
 	}
-	if (possibleValues.size() != 1 && filterType & NoChoice) {
-		possibleValues = noChoiceFilter(sudoku, row, col);
-		changed = possibleValues != sudoku->getCellPossibleValues(row, col);
-		sudoku->setCellPossibleValues(row, col, possibleValues);
+	if (filterType & NoChoice) {
+		possibleValues.intersect(noChoiceFilter(sudoku, row, col));
 	}
-
-	return changed;
+	
+	return possibleValues;
 }
 
 /// TODO : devrait aussi considérer les Cell vides mais qui n'ont qu'une seule valeur possible
@@ -84,7 +84,7 @@ QSet<int> solver::directValueFilter(const Sudoku *sudoku, int row, int col)
 
 		int squareRow = (row / 3) * 3 + i % 3;
 		int squareCol = (col / 3) * 3 + i / 3;
-		if(i!= row || i != col)
+		if(i != row || i != col)
 			possibleValues.remove(sudoku->getCellValue(squareRow, squareCol));
 	}
 
@@ -178,20 +178,16 @@ QSet<int> solver::hiddenGroupValueFilter(const Sudoku *sudoku, int row, int col)
 		// row
 		for (int i = 0; i < SUDOKU_SIZE; ++i) {
 			int nbMatchValues = 0;
-			bool partOfGrp = false;
 			QSet<int> values = sudoku->getCellPossibleValues(row, i);
 			foreach(int curValue, curSet) {
 				if (values.contains(curValue)) {
 					++nbMatchValues;
 				}
-				if (values.contains(curValue)) {
-					partOfGrp = true;
-				}
 			}
 			if (nbMatchValues == curSet.size()) {
 				++nbCellsWithGrp;
 			}
-			if (partOfGrp) {
+			if (nbMatchValues) {
 				++nbCellsWithPartOfGrp;
 			}
 		}
@@ -202,27 +198,22 @@ QSet<int> solver::hiddenGroupValueFilter(const Sudoku *sudoku, int row, int col)
 			foreach(int val, curSet) {
 				possibleValues.insert(val);
 			}
-			// TODO : Modifier la valeur du possibleValues des autres membres du groupe ?
 			break;
 		}
 
 		// col
 		for (int i = 0; i < SUDOKU_SIZE; ++i) {
 			int nbMatchValues = 0;
-			bool partOfGrp = false;
 			QSet<int> tmpPossibleValues = sudoku->getCellPossibleValues(i, col);
 			foreach(int curValue, curSet) {
 				if (tmpPossibleValues.contains(curValue)) {
 					++nbMatchValues;
 				}
-				if (tmpPossibleValues.contains(curValue)) {
-					partOfGrp = true;
-				}
 			}
 			if (nbMatchValues == curSet.size()) {
 				++nbCellsWithGrp;
 			}
-			if (partOfGrp) {
+			if (nbMatchValues) {
 				++nbCellsWithPartOfGrp;
 			}
 		}
@@ -233,14 +224,12 @@ QSet<int> solver::hiddenGroupValueFilter(const Sudoku *sudoku, int row, int col)
 			foreach(int val, curSet) {
 				possibleValues.insert(val);
 			}
-			// TODO : Modifier la valeur du possibleValues des autres membres du groupe ?
 			break;
 		}
 
 		// square
 		for (int i = 0; i < SUDOKU_SIZE; ++i) {
 			int nbMatchValues = 0;
-			bool partOfGrp = false;
 			int squareRow = (row / 3) * 3 + i % 3;
 			int squareCol = (col / 3) * 3 + i / 3;
 			QSet<int> tmpPossibleValues = sudoku->getCellPossibleValues(squareRow, squareCol);
@@ -248,14 +237,11 @@ QSet<int> solver::hiddenGroupValueFilter(const Sudoku *sudoku, int row, int col)
 				if (tmpPossibleValues.contains(curValue)) {
 					++nbMatchValues;
 				}
-				if (tmpPossibleValues.contains(curValue)) {
-					partOfGrp = true;
-				}
 			}
 			if (nbMatchValues == curSet.size()) {
 				++nbCellsWithGrp;
 			}
-			if (partOfGrp) {
+			if (nbMatchValues) {
 				++nbCellsWithPartOfGrp;
 			}
 		}
@@ -266,7 +252,6 @@ QSet<int> solver::hiddenGroupValueFilter(const Sudoku *sudoku, int row, int col)
 			foreach(int val, curSet) {
 				possibleValues.insert(val);
 			}
-			// TODO : Modifier la valeur du possibleValues des autres membres du groupe ?
 			break;
 		}
 	}

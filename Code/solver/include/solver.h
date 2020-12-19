@@ -38,15 +38,14 @@ namespace solver{
 	* Update the possible values of the cell of the sudoku using given the filters.
 	* 'Applying a filter' means removing possible values from the requested cell using differents strategies (or filters).
 	* filterType is to be used as a flag, each bit corresponding to a filter (cf FilterTypes).
-	* It returns true if the filters applied removed at least one value in any of the cells of the Sudoku.
 	*
 	* @param sudoku The sudoku to update
 	* @param filterType The filters to be used 
 	* @param row Row of the cell to apply the filter on 
 	* @param col Column of the cell to apply the filter on 
-	* @returns Returns true if the sudoku has been changed
+	* @returns Returns the updated set of possible values
 	*/
-	bool DLL_EXPORT applyFilterOnCell(Sudoku *sudoku, int filterType, int row, int col);
+	QSet<int> DLL_EXPORT applyFiltersOnCell(Sudoku *sudoku, int filterType, int row, int col);
 
 	/*!
 	* Use the "direct" filter on a cell of the sudoku and return the filtered possible values
