@@ -189,6 +189,18 @@ int Sudoku::loadFromCsv(QString csvPath)
 	return 0;
 }
 
+void Sudoku::autofill()
+{
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			QSet<int> values = getCellPossibleValues(i, j);
+			if (values.size() == 1) {
+				setCellValue(i, j, *values.begin());
+			}
+		}
+	}
+}
+
 void Sudoku::reset()
 {
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {

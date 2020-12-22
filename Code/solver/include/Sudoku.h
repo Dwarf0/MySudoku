@@ -147,6 +147,11 @@ public:
 	int loadFromCsv(QString filepath);
 
 	/*!
+	*  Automatically set the value of the empty cells with only one possible value
+	*/
+	void autofill();
+
+	/*!
 	* Returns a string version of the sudoku
 	*
 	* Returns a string version of the sudoku that could be outputted to a csv file.

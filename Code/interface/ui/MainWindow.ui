@@ -22,41 +22,79 @@
      <widget class="SudokuView" name="tableView"/>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QVBoxLayout" name="helpLayout">
       <item>
-       <widget class="QPushButton" name="directFilterButton">
-        <property name="text">
-         <string>Direct</string>
+       <widget class="QGroupBox" name="filterGroupBox">
+        <property name="title">
+         <string>Filters</string>
         </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QPushButton" name="directFilterButton">
+           <property name="text">
+            <string>Direct</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="indirectFilterButton">
+           <property name="text">
+            <string>Indirect</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="groupFilterButton">
+           <property name="text">
+            <string>Group</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="hiddenFilterButton">
+           <property name="text">
+            <string>HiddenGroup</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="noChoiceFilterButton">
+           <property name="text">
+            <string>NoChoice</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="indirectFilterButton">
-        <property name="text">
-         <string>Indirect</string>
+       <widget class="QGroupBox" name="helperGroupBox">
+        <property name="title">
+         <string>Shortcut</string>
         </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QPushButton" name="autofillButton">
+           <property name="text">
+            <string>Autofill</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="groupFilterButton">
-        <property name="text">
-         <string>Group</string>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="hiddenFilterButton">
-        <property name="text">
-         <string>HiddenGroup</string>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="noChoiceFilterButton">
-        <property name="text">
-         <string>NoChoice</string>
-        </property>
-       </widget>
+       </spacer>
       </item>
      </layout>
     </item>
@@ -126,5 +164,38 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionDisplayHelp</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>filterGroupBox</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>742</x>
+     <y>116</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDisplayHelp</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>helperGroupBox</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>742</x>
+     <y>236</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

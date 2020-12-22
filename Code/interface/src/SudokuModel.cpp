@@ -14,26 +14,29 @@ SudokuModel::SudokuModel(QWidget *parent) {
 SudokuModel::~SudokuModel() {
 }
 
+void SudokuModel::setAutocheckMode(bool autocheck) 
+{ 
+	_autocheckMode = autocheck; 
+	emit dataChanged(createIndex(0, 0), createIndex(SUDOKU_SIZE - 1, SUDOKU_SIZE - 1));
+}
+
 void SudokuModel::displayHelp(bool displayHelp) 
 { 
 	_displayHelp = displayHelp; 
+	emit dataChanged(createIndex(0, 0), createIndex(SUDOKU_SIZE - 1, SUDOKU_SIZE - 1));
 }
 
 void SudokuModel::applyFilter(int filterType)
 {
 	if (solver::updatePossibleValues(_sudoku, filterType)) {
-		emit dataChanged(createIndex(0, 0), createIndex(8, 8));
+		emit dataChanged(createIndex(0, 0), createIndex(SUDOKU_SIZE-1, SUDOKU_SIZE - 1));
 	}
 }
 
 void SudokuModel::resetModelValues()
 {
 	_sudoku->reset();
-}
-
-void SudokuModel::updateCellsPossibleValues()
-{
-	solver::updatePossibleValues(_sudoku);
+	emit dataChanged(createIndex(0, 0), createIndex(SUDOKU_SIZE - 1, SUDOKU_SIZE - 1));
 }
 
 QVariant SudokuModel::data(const QModelIndex &index, int role) const
@@ -133,4 +136,10 @@ bool SudokuModel::isValid()
 bool SudokuModel::isFilled()
 {
 	return _sudoku->isFilled();
+}
+
+void SudokuModel::autofill()
+{
+	_sudoku->autofill();
+	emit dataChanged(createIndex(0, 0), createIndex(SUDOKU_SIZE - 1, SUDOKU_SIZE - 1));
 }

@@ -16,11 +16,13 @@ MySudokuViewer::MySudokuViewer(QWidget *parent) {
 	_sudokuView->setModel(_sudokuModel);
 	_sudokuView->setItemDelegate(_sudokuDelegate);
 	
+	_mainWindowUi.filterGroupBox->setVisible(false);
+	_mainWindowUi.helperGroupBox->setVisible(false);
+
 	connect(_mainWindowUi.actionLoadFromCsv, &QAction::triggered, this, &MySudokuViewer::loadFromCsv);
 	connect(_mainWindowUi.actionInitManually, &QAction::triggered, this, &MySudokuViewer::initManually);
 	connect(_mainWindowUi.actionAutocheck, &QAction::triggered, _sudokuModel, &SudokuModel::setAutocheckMode);
 	connect(_mainWindowUi.actionDisplayHelp, &QAction::triggered, _sudokuModel, &SudokuModel::displayHelp);
-
 	
 	QSignalMapper* signalMapper = new QSignalMapper(this);
 	connect(_mainWindowUi.directFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
@@ -28,12 +30,15 @@ MySudokuViewer::MySudokuViewer(QWidget *parent) {
 	connect(_mainWindowUi.groupFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
 	connect(_mainWindowUi.hiddenFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
 	connect(_mainWindowUi.noChoiceFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
-
+	
 	signalMapper->setMapping(_mainWindowUi.directFilterButton, solver::Direct);
 	signalMapper->setMapping(_mainWindowUi.indirectFilterButton, solver::Indirect);
 	signalMapper->setMapping(_mainWindowUi.groupFilterButton, solver::Group);
 	signalMapper->setMapping(_mainWindowUi.hiddenFilterButton, solver::HiddenGroup);
 	signalMapper->setMapping(_mainWindowUi.noChoiceFilterButton, solver::NoChoice);
+
+	connect(_mainWindowUi.autofillButton, &QPushButton::clicked, _sudokuModel, &SudokuModel::autofill);
+
 
 	connect(signalMapper, QOverload<int>::of(&QSignalMapper::mapped), _sudokuModel, &SudokuModel::applyFilter);
 }

@@ -89,11 +89,6 @@ public:
 	void initFromSudoku(const Sudoku *sudoku);
 
 	/*!
-	* Update the possibleValues of each cell of the Sudoku
-	*/
-	void updateCellsPossibleValues();
-
-	/*!
 	* Check if the cells' values of the current Sudoku respects sudoku rules
 	* 
 	* @returns true if sudoku rules are respected, false otherwise
@@ -134,7 +129,7 @@ public slots:
 	*
 	* @param autocheck true if autocheck mode is to be used, false otherwise
 	*/
-	void setAutocheckMode(bool autocheck) { _autocheckMode = autocheck; }
+	void setAutocheckMode(bool autocheck);
 	/*!
 	* Set if the help mode is to be used or not.
 	*
@@ -144,6 +139,11 @@ public slots:
 	* @param displayHelp true if help mode is to be used, false otherwise
 	*/
 	void displayHelp(bool displayHelp);
+
+	/*!
+	* Automatically set the value of the empty cells with only one possible value
+	*/
+	void autofill();
 
 private:
 	/*!
