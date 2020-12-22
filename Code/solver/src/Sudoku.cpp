@@ -33,10 +33,10 @@ Sudoku& Sudoku::operator=(const Sudoku& other)
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
 			if (other.isCellInitialValue(i, j)) {
-				_values[i][j]->setInitialValue(other.getCellValue(i, j));
+				setCellInitialValue(i, j, other.getCellValue(i, j));
 			} else {
-				_values[i][j]->setPossibleValues(other.getCellPossibleValues(i, j));
-				_values[i][j]->setValue(other.getCellValue(i, j));
+				setCellPossibleValues(i, j, other.getCellPossibleValues(i, j));
+				setCellValue(i, j, other.getCellValue(i, j));
 			}
 		}
 	}
@@ -47,7 +47,7 @@ bool Sudoku::isFilled() const
 {
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
-			if (_values[i][j]->getValue() == 0) {
+			if (getCellValue(i, j) == 0) {
 				return false;
 			}
 		}
@@ -203,7 +203,7 @@ void Sudoku::clean()
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {
 			if (!_values[i][j]->isInitialValue())
-				_values[i][j]->setValue(0);
+				setCellValue(i, j, 0);
 		}
 	}
 }

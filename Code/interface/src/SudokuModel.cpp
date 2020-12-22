@@ -119,7 +119,10 @@ int SudokuModel::loadFromCsv(QString csvPath)
 
 void SudokuModel::initFromSudoku(const Sudoku * sudoku)
 {
+	resetModelValues();
+	enableInitMode();
 	*_sudoku = *sudoku;
+	disableInitMode();
 }
 
 bool SudokuModel::isValid()
