@@ -50,25 +50,6 @@ void solver::solve(Sudoku *sudoku)
 	}
 }
 
-/// TODO : Faire une fonction solve dont l'algo pourrait ressembler à :
-//func solve{
-//	while (changed) {
-//		pour chaque filtre F,
-//			changed |= updatePossibleValues avec filtre F
-//	}
-//	si le sudoku est résolu,
-//		fin de la func
-//	sinon, on récupère la cell avec le moins de possibleValues
-//	pour chaque valeur V possible de la cell
-//		on clone le sudoku actuel
-//		on set la valeur de la cell du clone avec V
-//		on rappelle solve sur le clone
-//		si le sudoku est résolu,
-//			on affecte les valeurs du clone au sudoku initial
-//			fin de la func
-//		sinon, la valeur utilisé précédemment n était pas la bonne
-//}
-
 bool solver::updatePossibleValues(Sudoku *sudoku, int filterType/*=0*/)
 {
 	// NB : We copy the given sudoku so we can update the sudoku's cells' possible values while still 
