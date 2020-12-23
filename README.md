@@ -6,10 +6,13 @@ I am developping this project on Windows with Visual Studio and using :
 - C++ 11 as programming language,
 - Qt5 as a framework for my UI,
 - GTest for testing the solver
+- Doxygen for documentation 
 
-I also plan to add Doxygen for documentation and use QTranslator for localization of the few words (for the sake of it).
+I also plan to use QTranslator for localization of the few words (for the sake of it).
 
-Some features that could be added:
-- being able to save current state of the Sudoku and then reload it (to come back at it later)
+
+Some features that I'll try to add later:
+- save current state of the Sudoku (and then reload it to come back to it later)
 - add an undo/redo
-- add a proper solver (might run it a QThread worker right after loading the csv)
+- run my solver on a QThread worker right after loading the csv
+- process a picture of a Sudoku with OpenCV to each cell and send each cell through a MNIST trained convolutional neural network to get the associated number
