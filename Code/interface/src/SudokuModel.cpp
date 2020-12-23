@@ -33,6 +33,12 @@ void SudokuModel::applyFilter(int filterType)
 	}
 }
 
+void SudokuModel::solve()
+{
+	solver::solve(_sudoku);
+	emit dataChanged(createIndex(0, 0), createIndex(SUDOKU_SIZE - 1, SUDOKU_SIZE - 1));
+}
+
 void SudokuModel::resetModelValues()
 {
 	_sudoku->reset();

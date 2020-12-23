@@ -1,4 +1,54 @@
 ﻿#include "solver.h"
+#include <iostream>
+
+
+void solver::solve(Sudoku *sudoku)
+{
+	bool changed = true;
+	int allFilters = 0;
+	for (int i = 0; i < FILTER_TYPES_NB; ++i) {
+		allFilters |= 1 << i;
+	}
+	while (changed) {
+		sudoku->autofill();
+		changed = updatePossibleValues(sudoku, allFilters);
+	}
+	sudoku->autofill();
+	if (sudoku->isSolved()) {
+		return;
+	}
+
+	int row = -1;
+	int col = -1;
+	QSet<int> possibleValues = {1, 2, 3, 4, 5, 6, 7 ,8 , 9};
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			QSet<int> tmp = sudoku->getCellPossibleValues(i, j);
+			if (tmp.size() < possibleValues.size() && sudoku->getCellValue(i, j) == 0) {
+				row = i;
+				col = j;
+				possibleValues = tmp;
+			}
+		}
+	}
+	
+	foreach(int value, possibleValues) {
+		Sudoku clone;
+		clone = *sudoku;
+
+		clone.setCellValue(row, col, value);
+		clone.setCellPossibleValues(row, col, { value });
+		solve(&clone);
+		if (clone.isSolved()) {
+			*sudoku = clone;
+			std::cout << "A supposition had to be made to solve the Sudoku" << std::endl;
+			return;
+		}
+	}
+	if (false) {
+		sudoku->print();
+	}
+}
 
 /// TODO : Faire une fonction solve dont l'algo pourrait ressembler à :
 //func solve{

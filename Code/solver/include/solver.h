@@ -17,6 +17,17 @@ namespace solver{
 		HiddenGroup=8,
 		NoChoice = 16,
 	};
+#define FILTER_TYPES_NB 5
+	
+	/*!
+	* Solve the given Sudoku.
+	*
+	* Solve the Sudoku using all the filters available. If it is not enough to solve the sudoku, it affects a possible value
+	* to an empty cell then run the filters again.
+	*
+	* @param sudoku The sudoku to solve
+	*/
+	void DLL_EXPORT solve(Sudoku *sudoku);
 
 	/*!
 	* Apply the given filters to the Sudoku.

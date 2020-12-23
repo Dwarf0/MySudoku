@@ -120,6 +120,8 @@ public:
 	*/
 	void applyFilter(int filterType);
 
+	void solve();
+
 public slots:
 	/*!
 	* Set if the autocheck mode is to be used or not.

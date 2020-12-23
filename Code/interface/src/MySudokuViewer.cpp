@@ -23,6 +23,8 @@ MySudokuViewer::MySudokuViewer(QWidget *parent) {
 	connect(_mainWindowUi.actionInitManually, &QAction::triggered, this, &MySudokuViewer::initManually);
 	connect(_mainWindowUi.actionAutocheck, &QAction::triggered, _sudokuModel, &SudokuModel::setAutocheckMode);
 	connect(_mainWindowUi.actionDisplayHelp, &QAction::triggered, _sudokuModel, &SudokuModel::displayHelp);
+
+	connect(_mainWindowUi.solveButton, &QPushButton::clicked, _sudokuModel, &SudokuModel::solve);
 	
 	QSignalMapper* signalMapper = new QSignalMapper(this);
 	connect(_mainWindowUi.directFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
