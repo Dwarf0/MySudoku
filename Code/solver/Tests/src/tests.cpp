@@ -172,3 +172,21 @@ TEST(filter_testcase, nochoice_filter)
 	EXPECT_EQ(indirect, sudoku.getCellPossibleValues(cellRow, cellCol));
 }
 
+TEST(solver_testcase, expert_solve)
+{
+	// After the Direct filter, cell (0, 2) is the only one that can holds 1 in its column
+	Sudoku sudoku, sudokuSolution;
+	QString path(TESTS_PATH);
+
+	int err = sudoku.loadFromCsv(path + "/data/expert.csv");
+	EXPECT_EQ(err, 0);
+	EXPECT_EQ(sudoku.isValid(), true);
+
+
+	err = sudokuSolution.loadFromCsv(path + "/data/expert_solution.csv");
+	EXPECT_EQ(err, 0);
+	EXPECT_EQ(sudokuSolution.isValid(), true);
+
+	solver::solve(&sudoku);
+	EXPECT_TRUE(sudoku == sudokuSolution);
+}

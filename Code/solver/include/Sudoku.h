@@ -40,6 +40,8 @@ public:
 	*/
 	Sudoku& operator=(const Sudoku& other);
 
+	bool operator==(const Sudoku& other);
+
 	/*!
 	* Indicates if every cell's value has been set
 	* @returns True if all SudokuCell contain a value

@@ -43,6 +43,18 @@ Sudoku& Sudoku::operator=(const Sudoku& other)
 	return *this;
 }
 
+bool Sudoku::operator==(const Sudoku & other)
+{
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			if (getCellValue(i, j) != other.getCellValue(i, j)) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 bool Sudoku::isFilled() const
 {
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
