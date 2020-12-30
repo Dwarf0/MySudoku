@@ -1,5 +1,16 @@
-﻿#include "solver.h"
+﻿#include "Solver.h"
 #include <iostream>
+
+
+Solver::Solver()
+{
+	_filters[Direct] = Filter("Direct", "tmp_descr", directValueFilter);
+	_filters[Indirect] = Filter("Indirect", "tmp_descr", indirectValueFilter);
+	_filters[Group] = Filter("Group", "tmp_descr", groupValueFilter);
+	_filters[HiddenGroup] = Filter("HiddenGroup", "tmp_descr", hiddenGroupValueFilter);
+	_filters[NoChoice] = Filter("NoChoice", "tmp_descr", noChoiceFilter);
+
+}
 
 
 void Solver::solve(Sudoku *sudoku)

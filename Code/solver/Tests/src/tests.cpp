@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 #include "Sudoku.h"
-#include "solver.h"
+#include "Solver.h"
 #include "core.h"
 
 TEST(load_csv_testcase, load_csv_ok)

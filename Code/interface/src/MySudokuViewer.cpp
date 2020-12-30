@@ -1,5 +1,5 @@
 #include "MySudokuViewer.h"
-#include "solver.h"
+#include "Solver.h"
 
 #include <QFileDialog>
 #include <QSignalMapper>
@@ -27,17 +27,18 @@ MySudokuViewer::MySudokuViewer(QWidget *parent) {
 	connect(_mainWindowUi.solveButton, &QPushButton::clicked, _sudokuModel, &SudokuModel::solve);
 	
 	QSignalMapper* signalMapper = new QSignalMapper(this);
+
 	connect(_mainWindowUi.directFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
 	connect(_mainWindowUi.indirectFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
 	connect(_mainWindowUi.groupFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
 	connect(_mainWindowUi.hiddenFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
 	connect(_mainWindowUi.noChoiceFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
 	
-	signalMapper->setMapping(_mainWindowUi.directFilterButton, solver::Direct);
-	signalMapper->setMapping(_mainWindowUi.indirectFilterButton, solver::Indirect);
-	signalMapper->setMapping(_mainWindowUi.groupFilterButton, solver::Group);
-	signalMapper->setMapping(_mainWindowUi.hiddenFilterButton, solver::HiddenGroup);
-	signalMapper->setMapping(_mainWindowUi.noChoiceFilterButton, solver::NoChoice);
+	signalMapper->setMapping(_mainWindowUi.directFilterButton, Solver::Direct);
+	signalMapper->setMapping(_mainWindowUi.indirectFilterButton, Solver::Indirect);
+	signalMapper->setMapping(_mainWindowUi.groupFilterButton, Solver::Group);
+	signalMapper->setMapping(_mainWindowUi.hiddenFilterButton, Solver::HiddenGroup);
+	signalMapper->setMapping(_mainWindowUi.noChoiceFilterButton, Solver::NoChoice);
 
 	connect(_mainWindowUi.autofillButton, &QPushButton::clicked, _sudokuModel, &SudokuModel::autofill);
 

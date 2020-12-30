@@ -8,6 +8,8 @@
 
 #include "globals.h"
 #include "Sudoku.h"
+#include "Solver.h"
+
 /*!
 * This model is used as an interface between a Sudoku data and its (table) view.
 */
@@ -157,6 +159,7 @@ private:
 	bool _displayHelp;
 
 	Sudoku *_sudoku;
+	Solver solver;
 };
 
 #endif // SUDOKUMODEL_H

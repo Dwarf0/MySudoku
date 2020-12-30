@@ -3,7 +3,6 @@
 #include <QBrush>
 
 #include "SudokuModel.h"
-#include "solver.h"
 
 SudokuModel::SudokuModel(QWidget *parent) {
 	_autocheckMode = false;
@@ -23,19 +22,6 @@ void SudokuModel::setAutocheckMode(bool autocheck)
 void SudokuModel::displayHelp(bool displayHelp) 
 { 
 	_displayHelp = displayHelp; 
-	emit dataChanged(createIndex(0, 0), createIndex(SUDOKU_SIZE - 1, SUDOKU_SIZE - 1));
-}
-
-void SudokuModel::applyFilter(int filterType)
-{
-	if (solver::updatePossibleValues(_sudoku, filterType)) {
-		emit dataChanged(createIndex(0, 0), createIndex(SUDOKU_SIZE-1, SUDOKU_SIZE - 1));
-	}
-}
-
-void SudokuModel::solve()
-{
-	solver::solve(_sudoku);
 	emit dataChanged(createIndex(0, 0), createIndex(SUDOKU_SIZE - 1, SUDOKU_SIZE - 1));
 }
 
@@ -147,5 +133,18 @@ bool SudokuModel::isFilled()
 void SudokuModel::autofill()
 {
 	_sudoku->autofill();
+	emit dataChanged(createIndex(0, 0), createIndex(SUDOKU_SIZE - 1, SUDOKU_SIZE - 1));
+}
+
+void SudokuModel::applyFilter(int filterType)
+{
+	if (solver.updatePossibleValues(_sudoku, filterType)) {
+		emit dataChanged(createIndex(0, 0), createIndex(SUDOKU_SIZE - 1, SUDOKU_SIZE - 1));
+	}
+}
+
+void SudokuModel::solve()
+{
+	solver.solve(_sudoku);
 	emit dataChanged(createIndex(0, 0), createIndex(SUDOKU_SIZE - 1, SUDOKU_SIZE - 1));
 }

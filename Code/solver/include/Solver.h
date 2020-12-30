@@ -65,18 +65,15 @@ public:
 	*/
 	QSet<int> applyFiltersOnCell(Sudoku *sudoku, int filterType, int row, int col);
 
+	/*!
+	* Return a hash of adressable filters.
+	*
+	* @returns Returns  a hash of adressable filters
+	*/
+	const QHash<FilterTypes, Filter> getFilters() { return _filters; }
+
 private:
 	QHash<FilterTypes, Filter> _filters;
 };
-
-Solver::Solver()
-{
-	_filters[Direct] = Filter("Direct", "tmp_descr", directValueFilter);
-	_filters[Indirect] = Filter("Indirect", "tmp_descr", indirectValueFilter);
-	_filters[Group] = Filter("Group", "tmp_descr", groupValueFilter);
-	_filters[HiddenGroup] = Filter("HiddenGroup", "tmp_descr", hiddenGroupValueFilter);
-	_filters[NoChoice] = Filter("NoChoice", "tmp_descr", noChoiceFilter);
-
-}
 
 #endif

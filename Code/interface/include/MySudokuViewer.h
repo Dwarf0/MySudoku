@@ -12,7 +12,6 @@
 #include "SudokuView.h"
 #include "SudokuDelegate.h"
 
-
 class MySudokuViewer : public QMainWindow
 {
 	Q_OBJECT
