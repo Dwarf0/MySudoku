@@ -11,20 +11,21 @@ include_directories(
 set(SUDOKU_SOLVER_SOURCE_FILES
     src/SudokuCell.cpp
     src/Sudoku.cpp
-    src/solver.cpp
+    src/Solver.cpp
+    src/core.cpp
 )
-# PREPEND(SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${SUDOKU_SOLVER_SOURCE_FILES})
+# file(GLOB SUDOKU_SOLVER_SOURCE_FILES "src/*.cpp")
 
 set(SUDOKU_SOLVER_PUBLIC_HEADER_FILES
     include/Sudoku.h
-    include/solver.h
+    include/Solver.h
 )
 
 set(SUDOKU_SOLVER_PRIVATE_HEADER_FILES
     include/SudokuCell.h
+    include/core.h
 )
-# PREPEND(HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${SUDOKU_SOLVER_HEADER_FILES})
-
+# file(GLOB SUDOKU_SOLVER_PRIVATE_HEADER_FILES "include/*.h")
 
 set(CMAKE_AUTOMOC OFF)
 qt5_wrap_cpp(MOC_HEADERS ${SUDOKU_SOLVER_HEADER_FILES})

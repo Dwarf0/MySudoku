@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 #include "Sudoku.h"
 #include "solver.h"
+#include "core.h"
 
 TEST(load_csv_testcase, load_csv_ok)
 {
@@ -38,6 +39,7 @@ TEST(load_csv_testcase, load_csv_invalid)
 
 TEST(filter_testcase, direct_filter)
 {
+	Solver solver;
 	Sudoku sudoku;
 	QString path(TESTS_PATH);
 	int cellRow = 0;
@@ -49,7 +51,7 @@ TEST(filter_testcase, direct_filter)
 
 	QSet<int> all = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	EXPECT_EQ(all, sudoku.getCellPossibleValues(cellRow, cellCol));
-	solver::updatePossibleValues(&sudoku, solver::Direct);
+	solver.updatePossibleValues(&sudoku, Solver::Direct);
 
 	QSet<int> direct = { 3, 9 };
 	EXPECT_EQ(direct, sudoku.getCellPossibleValues(cellRow, cellCol));
@@ -57,6 +59,7 @@ TEST(filter_testcase, direct_filter)
 
 TEST(filter_testcase, indirect_filter)
 {
+	Solver solver;
 	Sudoku sudoku;
 	QString path(TESTS_PATH);
 	int cellRow = 5;
@@ -69,12 +72,12 @@ TEST(filter_testcase, indirect_filter)
 	QSet<int> all = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	EXPECT_EQ(all, sudoku.getCellPossibleValues(cellRow, cellCol));
 
-	solver::updatePossibleValues(&sudoku, solver::Direct);
+	solver.updatePossibleValues(&sudoku, Solver::Direct);
 
 	QSet<int> direct = { 2, 5, 6, 8, 9 };
 	EXPECT_EQ(direct, sudoku.getCellPossibleValues(cellRow, cellCol));
 
-	solver::updatePossibleValues(&sudoku, solver::Indirect);
+	solver.updatePossibleValues(&sudoku, Solver::Indirect);
 
 	QSet<int> indirect = { 8, 9 };
 	EXPECT_EQ(indirect, sudoku.getCellPossibleValues(cellRow, cellCol));
@@ -83,6 +86,7 @@ TEST(filter_testcase, indirect_filter)
 TEST(filter_testcase, group_filter)
 {
 	// After the Direct filter, cells (8, 0) and (8, 1) both holds {2, 5} as possible values and form a group
+	Solver solver; 
 	Sudoku sudoku;
 	QString path(TESTS_PATH);
 	int cellRow = 7;
@@ -95,12 +99,12 @@ TEST(filter_testcase, group_filter)
 	QSet<int> all = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	EXPECT_EQ(all, sudoku.getCellPossibleValues(cellRow, cellCol));
 
-	solver::updatePossibleValues(&sudoku, solver::Direct);
+	solver.updatePossibleValues(&sudoku, Solver::Direct);
 
 	QSet<int> direct = { 5, 6 };
 	EXPECT_EQ(direct, sudoku.getCellPossibleValues(cellRow, cellCol));
 
-	solver::updatePossibleValues(&sudoku, solver::Group);
+	solver.updatePossibleValues(&sudoku, Solver::Group);
 
 	QSet<int> group = { 6 };
 	EXPECT_EQ(group, sudoku.getCellPossibleValues(cellRow, cellCol));
@@ -109,7 +113,7 @@ TEST(filter_testcase, group_filter)
 TEST(filter_testcase, create_combination_testcase)
 {
 	QList<QSet<int> > output;
-	solver::createCombinations(QSet<int>(), QSet<int>({ 1, 2, 3, 4 }), output);
+	createCombinations(QSet<int>(), QSet<int>({ 1, 2, 3, 4 }), output);
 	EXPECT_EQ(output.size(), 15);
 }
 
@@ -117,6 +121,7 @@ TEST(filter_testcase, hidden_group_filter)
 {
 	// After the Direct filter, cells (0, 2) and (0, 3) are the only cells int the row that can hold {1, 6} 
 	// as possible values and form a group
+	Solver solver; 
 	Sudoku sudoku;
 	QString path(TESTS_PATH);
 	int cellRow1 = 0;
@@ -132,14 +137,14 @@ TEST(filter_testcase, hidden_group_filter)
 	EXPECT_EQ(all, sudoku.getCellPossibleValues(cellRow1, cellCol1));
 	EXPECT_EQ(all, sudoku.getCellPossibleValues(cellRow2, cellCol2));
 
-	solver::updatePossibleValues(&sudoku, solver::Direct);
+	solver.updatePossibleValues(&sudoku, Solver::Direct);
 
 	QSet<int> direct1 = { 1, 6, 9 };
 	EXPECT_EQ(direct1, sudoku.getCellPossibleValues(cellRow1, cellCol1));
 	QSet<int> direct2 = { 1, 3, 6, 9 };
 	EXPECT_EQ(direct2, sudoku.getCellPossibleValues(cellRow2, cellCol2));
 
-	solver::updatePossibleValues(&sudoku, solver::HiddenGroup);
+	solver.updatePossibleValues(&sudoku, Solver::HiddenGroup);
 
 	QSet<int> hiddenGroup = { 1, 6 };
 	EXPECT_EQ(hiddenGroup, sudoku.getCellPossibleValues(cellRow1, cellCol1));
@@ -149,6 +154,7 @@ TEST(filter_testcase, hidden_group_filter)
 TEST(filter_testcase, nochoice_filter)
 {
 	// After the Direct filter, cell (0, 2) is the only one that can holds 1 in its column
+	Solver solver; 
 	Sudoku sudoku;
 	QString path(TESTS_PATH);
 	int cellRow = 0;
@@ -161,12 +167,12 @@ TEST(filter_testcase, nochoice_filter)
 	QSet<int> all = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	EXPECT_EQ(all, sudoku.getCellPossibleValues(cellRow, cellCol));
 
-	solver::updatePossibleValues(&sudoku, solver::Direct);
+	solver.updatePossibleValues(&sudoku, Solver::Direct);
 
 	QSet<int> direct = { 1, 6, 9 };
 	EXPECT_EQ(direct, sudoku.getCellPossibleValues(cellRow, cellCol));
 
-	solver::updatePossibleValues(&sudoku, solver::NoChoice);
+	solver.updatePossibleValues(&sudoku, Solver::NoChoice);
 
 	QSet<int> indirect = { 1 };
 	EXPECT_EQ(indirect, sudoku.getCellPossibleValues(cellRow, cellCol));
@@ -175,6 +181,7 @@ TEST(filter_testcase, nochoice_filter)
 TEST(solver_testcase, expert_solve)
 {
 	// After the Direct filter, cell (0, 2) is the only one that can holds 1 in its column
+	Solver solver; 
 	Sudoku sudoku, sudokuSolution;
 	QString path(TESTS_PATH);
 
@@ -187,6 +194,6 @@ TEST(solver_testcase, expert_solve)
 	EXPECT_EQ(err, 0);
 	EXPECT_EQ(sudokuSolution.isValid(), true);
 
-	solver::solve(&sudoku);
+	solver.solve(&sudoku);
 	EXPECT_TRUE(sudoku == sudokuSolution);
 }
