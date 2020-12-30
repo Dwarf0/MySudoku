@@ -28,43 +28,7 @@
         <property name="title">
          <string>Filters</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QPushButton" name="directFilterButton">
-           <property name="text">
-            <string>Direct</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="indirectFilterButton">
-           <property name="text">
-            <string>Indirect</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="groupFilterButton">
-           <property name="text">
-            <string>Group</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="hiddenFilterButton">
-           <property name="text">
-            <string>HiddenGroup</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="noChoiceFilterButton">
-           <property name="text">
-            <string>NoChoice</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <layout class="QVBoxLayout" name="verticalLayout"/>
        </widget>
       </item>
       <item>

@@ -2,7 +2,6 @@
 #include "Solver.h"
 
 #include <QFileDialog>
-#include <QSignalMapper>
 #include <QtGlobal>
 #include <QWindow>
 #include <QDialogButtonBox>
@@ -26,29 +25,28 @@ MySudokuViewer::MySudokuViewer(QWidget *parent) {
 
 	connect(_mainWindowUi.solveButton, &QPushButton::clicked, _sudokuModel, &SudokuModel::solve);
 	
-	QSignalMapper* signalMapper = new QSignalMapper(this);
+	_signalMapper = new QSignalMapper(this);
+	const QHash<Solver::FilterTypes, Filter> filters = _sudokuModel->getFilters();
 
-	connect(_mainWindowUi.directFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
-	connect(_mainWindowUi.indirectFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
-	connect(_mainWindowUi.groupFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
-	connect(_mainWindowUi.hiddenFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
-	connect(_mainWindowUi.noChoiceFilterButton, &QPushButton::clicked, signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
-	
-	signalMapper->setMapping(_mainWindowUi.directFilterButton, Solver::Direct);
-	signalMapper->setMapping(_mainWindowUi.indirectFilterButton, Solver::Indirect);
-	signalMapper->setMapping(_mainWindowUi.groupFilterButton, Solver::Group);
-	signalMapper->setMapping(_mainWindowUi.hiddenFilterButton, Solver::HiddenGroup);
-	signalMapper->setMapping(_mainWindowUi.noChoiceFilterButton, Solver::NoChoice);
+	QList<Solver::FilterTypes> types = filters.keys();
+	qSort<QList<Solver::FilterTypes> >(types);
+	foreach(Solver::FilterTypes type, types) {
+		QPushButton *button = new QPushButton(this);
+		button->setText(filters[type].name());
+		button->setToolTip(filters[type].description());
+		connect(button, &QPushButton::clicked, _signalMapper, static_cast<void (QSignalMapper::*)(void)> (&QSignalMapper::map));
+		_signalMapper->setMapping(button, type);
+		_mainWindowUi.filterGroupBox->layout()->addWidget(button);
+	}
 
 	connect(_mainWindowUi.autofillButton, &QPushButton::clicked, _sudokuModel, &SudokuModel::autofill);
-
-
-	connect(signalMapper, QOverload<int>::of(&QSignalMapper::mapped), _sudokuModel, &SudokuModel::applyFilter);
+	connect(_signalMapper, QOverload<int>::of(&QSignalMapper::mapped), _sudokuModel, &SudokuModel::applyFilter);
 }
 
 MySudokuViewer::~MySudokuViewer() {
 	delete _sudokuModel;
 	delete _sudokuDelegate;
+	delete _signalMapper;
 }
 
 void MySudokuViewer::loadFromCsv()

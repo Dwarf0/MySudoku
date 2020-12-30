@@ -122,7 +122,12 @@ public:
 	*/
 	void applyFilter(int filterType);
 
+	/*!
+	* Completely solve the Sudoku.
+	*/
 	void solve();
+
+	const QHash<Solver::FilterTypes, Filter> getFilters() { return solver.getFilters(); }
 
 public slots:
 	/*!

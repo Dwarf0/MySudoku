@@ -19,6 +19,7 @@ set(SUDOKU_SOLVER_SOURCE_FILES
 set(SUDOKU_SOLVER_PUBLIC_HEADER_FILES
     include/Sudoku.h
     include/Solver.h
+    include/Filter.h
 )
 
 set(SUDOKU_SOLVER_PRIVATE_HEADER_FILES

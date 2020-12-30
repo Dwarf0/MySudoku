@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMainWindow>
+#include <QSignalMapper>
 #include <iostream>
 
 #include "ui_InitDialog.h"
@@ -26,9 +27,12 @@ private slots:
 private:
 	Ui::MainWindow _mainWindowUi;
 	Ui::InitDialog _initDialogUi;
+
 	SudokuModel *_sudokuModel;
 	SudokuView *_sudokuView;
 	SudokuDelegate *_sudokuDelegate;
+
+	QSignalMapper *_signalMapper;
 };
 
 #endif // MYSUDOKUVIEWER_H

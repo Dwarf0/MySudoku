@@ -9,7 +9,7 @@ struct Filter
 		_name(""), _briefDescription(""), _filter(nullptr)
 	{}
 	Filter(QString name, QString desc, QSet<int>(*filter)(const Sudoku *sudoku, int row, int col))
-		: _name(name), _briefDescription(name), _filter(filter)
+		: _name(name), _briefDescription(desc), _filter(filter)
 	{}
 	QString name() const { return _name; }
 	QString description() const { return _briefDescription; }
@@ -18,7 +18,7 @@ struct Filter
 		return _filter(sudoku, row, col);
 	}
 	
-protected:
+private:
 	QString _name;
 	QString _briefDescription;
 	QSet<int>(*_filter)(const Sudoku *sudoku, int row, int col);
