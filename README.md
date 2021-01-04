@@ -8,11 +8,11 @@ I am developping this project on Windows with Visual Studio and using :
 - GTest for testing the solver
 - Doxygen for documentation 
 
-I also plan to use QTranslator for localization of the few words (for the sake of it).
+At some point, I plan to use QTranslator for localization of the few sentences.
 
 
-Some features that I'll try to add later:
+Some features that I'll also try to add later:
 - save current state of the Sudoku (and then reload it to come back to it later)
 - add an undo/redo
-- run my solver on a QThread worker right after loading the csv
-- process a picture of a Sudoku with OpenCV to each cell and send each cell through a MNIST trained convolutional neural network to get the associated number
+- run my solver on a QThread worker right after loading a Sudoku
+- initialize a Sudoku from a picture by processing the picture of a Sudoku with OpenCV , segmenting each cell and send each one through a MNIST trained convolutional neural network to get the associated number

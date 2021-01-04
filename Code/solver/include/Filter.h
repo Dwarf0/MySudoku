@@ -3,6 +3,10 @@
 
 #include "Sudoku.h"
 
+/*!
+ * Filter's main purpose is to provide a filter function (defined at construction) along with some description
+ * about the filter it applies.
+*/
 struct Filter
 {
 	Filter():
@@ -15,7 +19,11 @@ struct Filter
 	QString description() const { return _briefDescription; }
 	QSet<int> filter (const Sudoku *sudoku, int row, int col) const
 	{
-		return _filter(sudoku, row, col);
+		if (_filter) {
+			return _filter(sudoku, row, col);
+		}
+		qWarning("Warning - Trying to use an uninitialised filter function!");
+		return QSet<int>();
 	}
 	
 private:
