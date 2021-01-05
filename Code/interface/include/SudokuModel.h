@@ -21,8 +21,16 @@ public:
 	SudokuModel(QWidget *parent = nullptr);
 	~SudokuModel();
 	
+	/*!
+	* Return the number of rows of the Sudoku
+	*/
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override { return SUDOKU_SIZE; }
+
+	/*!
+	* Return the number of columns of the Sudoku
+	*/
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override { return SUDOKU_SIZE; }
+
 	/*!
 	* This method overrides some of the roles of the QAbstractTableModel:
 	* - on Qt::DisplayRole, it displays the value (or the possible values if help is enabled) of the associated cell,
@@ -36,6 +44,7 @@ public:
 	* @returns a QVariant whose type depends on role
 	*/
 	QVariant data(const QModelIndex &index, int role) const override;
+
 	/*!
 	* This functions handles the flags of each cell.
 	*
@@ -62,12 +71,14 @@ public:
 	* @returns true if the new value has correctly been set, false otherwise
 	*/
 	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+
 	/*!
 	* Enable the initialization mode.
 	*
 	* The initialization mode makes all call to setData also set the "initialValue" state of the cell.
 	*/
 	void enableInitMode() { _sudokus[_curSudokuIdx]->enableInitMode(); }
+
 	/*!
 	* Disable the initialization mode.
 	*
@@ -131,6 +142,9 @@ public:
 	*/
 	void solve();
 
+	/*!
+	* Return the filters available as a QHash (the key being the FilterType)
+	*/
 	const QHash<Solver::FilterTypes, Filter> getFilters() { return solver.getFilters(); }
 
 public slots:
@@ -159,12 +173,25 @@ public slots:
 	*/
 	void autofill();
 
+	/*!
+	* Undo last action made on the Sudoku
+	*/
+	void undo();
+
+	/*!
+	* Redo the next action made on the Sudoku
+	*/
+	void redo();
+
 private:
 	/*!
 	* Reset Sudoku's cells' values.
 	*/
 	void resetModelValues();
 
+	/*!
+	* Append a new Sudoku to the history
+	*/
 	void addNewSudoku();
 
 	bool _autocheckMode;

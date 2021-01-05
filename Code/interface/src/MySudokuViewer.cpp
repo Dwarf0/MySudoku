@@ -5,6 +5,7 @@
 #include <QtGlobal>
 #include <QWindow>
 #include <QDialogButtonBox>
+#include <QShortcut>
 
 MySudokuViewer::MySudokuViewer(QWidget *parent) {
 	_mainWindowUi.setupUi(this);
@@ -22,6 +23,8 @@ MySudokuViewer::MySudokuViewer(QWidget *parent) {
 	connect(_mainWindowUi.actionInitManually, &QAction::triggered, this, &MySudokuViewer::initManually);
 	connect(_mainWindowUi.actionAutocheck, &QAction::triggered, _sudokuModel, &SudokuModel::setAutocheckMode);
 	connect(_mainWindowUi.actionDisplayHelp, &QAction::triggered, _sudokuModel, &SudokuModel::displayHelp);
+	connect(_mainWindowUi.actionUndo, &QAction::triggered, _sudokuModel, &SudokuModel::undo);
+	connect(_mainWindowUi.actionRedo, &QAction::triggered, _sudokuModel, &SudokuModel::redo);
 
 	connect(_mainWindowUi.solveButton, &QPushButton::clicked, _sudokuModel, &SudokuModel::solve);
 	
@@ -41,6 +44,11 @@ MySudokuViewer::MySudokuViewer(QWidget *parent) {
 
 	connect(_mainWindowUi.autofillButton, &QPushButton::clicked, _sudokuModel, &SudokuModel::autofill);
 	connect(_signalMapper, QOverload<int>::of(&QSignalMapper::mapped), _sudokuModel, &SudokuModel::applyFilter);
+
+	QShortcut *shortcut = new QShortcut(QKeySequence("Ctrl+Z"), this);
+	connect(shortcut, &QShortcut::activated, _sudokuModel, &SudokuModel::undo);
+	shortcut = new QShortcut(QKeySequence("Ctrl+Y"), this);
+	connect(shortcut, &QShortcut::activated, _sudokuModel, &SudokuModel::redo);
 }
 
 MySudokuViewer::~MySudokuViewer() {

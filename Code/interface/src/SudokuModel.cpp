@@ -39,7 +39,7 @@ void SudokuModel::resetModelValues()
 void SudokuModel::addNewSudoku()
 {
 	if (_curSudokuIdx < _sudokus.size() - 1)
-		_sudokus.erase(_sudokus.begin() + _curSudokuIdx, _sudokus.end());
+		_sudokus.erase(_sudokus.begin() + _curSudokuIdx + 1, _sudokus.end());
 	_sudokus.push_back(QSharedPointer<Sudoku>(new Sudoku(_sudokus[_curSudokuIdx].data())));
 	_curSudokuIdx = _sudokus.size() - 1;
 }
@@ -162,6 +162,20 @@ void SudokuModel::autofill()
 {
 	addNewSudoku();
 	_sudokus[_curSudokuIdx]->autofill();
+	emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, columnCount() - 1));
+}
+
+void SudokuModel::undo()
+{
+	if (_curSudokuIdx)
+		_curSudokuIdx--;
+	emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, columnCount() - 1));
+}
+
+void SudokuModel::redo()
+{
+	if (_curSudokuIdx < _sudokus.size() - 1)
+		_curSudokuIdx++;
 	emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, columnCount() - 1));
 }
 

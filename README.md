@@ -13,6 +13,5 @@ At some point, I plan to use QTranslator for localization of the few sentences.
 
 Some features that I'll also try to add later:
 - save current state of the Sudoku (and then reload it to come back to it later)
-- add an undo/redo
 - run my solver on a QThread worker right after loading a Sudoku
 - initialize a Sudoku from a picture by processing the picture of a Sudoku with OpenCV , segmenting each cell and send each one through a MNIST trained convolutional neural network to get the associated number
