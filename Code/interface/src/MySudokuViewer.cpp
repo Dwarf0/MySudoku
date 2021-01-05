@@ -68,8 +68,8 @@ void MySudokuViewer::initManually()
 	_initDialogUi.tableView->setModel(model);
 	_initDialogUi.tableView->setItemDelegate(delegate);
 	if (initWindow->exec() == QDialog::Accepted) {
-		const Sudoku * s = model->getSudoku();
-		_sudokuModel->initFromSudoku(s);
+		const QSharedPointer<Sudoku> s = model->getSudoku();
+		_sudokuModel->initFromSudoku(s.data());
 	}
 	delete initWindow;
 }

@@ -4,7 +4,8 @@
 #include <QObject>
 #include <QAbstractItemModel>
 #include <iostream>
-#include <qset.h>
+#include <QSet>
+#include <QSharedPointer>
 
 #include "globals.h"
 #include "Sudoku.h"
@@ -44,12 +45,13 @@ public:
 	* @returns all the flags associated with the cell
 	*/
 	Qt::ItemFlags flags(const QModelIndex &index) const;
+
 	/*!
 	* Return a constant pointer to the managed Sudoku.
 	*
 	* @returns a constant pointer to the managed Sudoku
 	*/
-	const Sudoku * getSudoku() { return _sudoku; }
+	const QSharedPointer<Sudoku> getSudoku() const { return _sudokus[_curSudokuIdx]; }
 	
 	/*!
 	* Sets the value of a SudokuCell.
@@ -65,13 +67,13 @@ public:
 	*
 	* The initialization mode makes all call to setData also set the "initialValue" state of the cell.
 	*/
-	void enableInitMode() { _sudoku->enableInitMode(); }
+	void enableInitMode() { _sudokus[_curSudokuIdx]->enableInitMode(); }
 	/*!
 	* Disable the initialization mode.
 	*
 	* The initialization mode makes all call to setData also set the "initialValue" state of the cell.
 	*/
-	void disableInitMode() { _sudoku->disableInitMode(); }
+	void disableInitMode() { _sudokus[_curSudokuIdx]->disableInitMode(); }
 	
 	/*!
 	* Initialize the Sudoku using the csv given at path.
@@ -83,6 +85,7 @@ public:
 	* @returns An error code
 	*/
 	int loadFromCsv(QString csvPath); 
+
 	/*!
 	* Initialize the Sudoku using the values of the cells of another Sudoku.
 	*
@@ -95,13 +98,14 @@ public:
 	* 
 	* @returns true if sudoku rules are respected, false otherwise
 	*/
-	bool isValid();
+	bool isValid() const;
+
 	/*!
 	* Check if all Sudoku's cells' values have been filled
 	*
 	* @returns true if all cells have a value, false otherwise
 	*/
-	bool isFilled();
+	bool isFilled() const;
 	
 	/*!
 	* An enumeration used to have additionnal roles for the SudokuModel::data mathod
@@ -139,6 +143,7 @@ public slots:
 	* @param autocheck true if autocheck mode is to be used, false otherwise
 	*/
 	void setAutocheckMode(bool autocheck);
+
 	/*!
 	* Set if the help mode is to be used or not.
 	*
@@ -160,10 +165,13 @@ private:
 	*/
 	void resetModelValues();
 
+	void addNewSudoku();
+
 	bool _autocheckMode;
 	bool _displayHelp;
 
-	Sudoku *_sudoku;
+	QVector<QSharedPointer<Sudoku> > _sudokus;
+	int _curSudokuIdx;
 	Solver solver;
 };
 

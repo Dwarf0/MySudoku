@@ -28,6 +28,10 @@ public:
 	*/
 	Sudoku();
 	/*!
+	* Sudoku's constructor
+	*/
+	Sudoku(const Sudoku * sudoku);
+	/*!
 	* Sudoku's deconstructor
 	*/
 	~Sudoku();

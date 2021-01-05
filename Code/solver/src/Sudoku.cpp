@@ -16,6 +16,19 @@ Sudoku::Sudoku()
 	}
 }
 
+Sudoku::Sudoku(const Sudoku * sudoku)
+{
+	_initMode = false;
+	for (int i = 0; i < SUDOKU_SIZE; ++i) {
+		for (int j = 0; j < SUDOKU_SIZE; ++j) {
+			_values[i][j] = new SudokuCell(sudoku->_values[i][j]);
+#ifdef _DEBUG
+			_solutionValues[i][j] = new SudokuCell(sudoku->_solutionValues[i][j]);
+#endif
+		}
+	}
+}
+
 Sudoku::~Sudoku() {
 	for (int i = 0; i < SUDOKU_SIZE; ++i) {
 		for (int j = 0; j < SUDOKU_SIZE; ++j) {

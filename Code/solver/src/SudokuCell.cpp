@@ -5,6 +5,16 @@
 #include <QBrush>
 
 
+SudokuCell::SudokuCell(const SudokuCell * s)
+{
+	_row = s->_row;
+	_col = s->_col;
+	_value = s->_value;
+	_isInitialValue = s->_isInitialValue;
+	_isValid = s->_isValid;
+	_possibleValues = s->_possibleValues;
+}
+
 void SudokuCell::setValue(int value)
 {
 	if (value < 0 || value > 9) {
